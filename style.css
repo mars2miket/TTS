@@ -1,0 +1,102 @@
+body { 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+    color: #1f2937; background-color: #f9fafb; width: 95%; max-width: 800px; margin: 30px auto; padding: 24px; box-sizing: border-box; position: relative; border-radius: 12px; background: #ffffff;
+}
+h2 { font-size: 24px; font-weight: 700; letter-spacing: -0.025em; color: #111827; margin-top: 15px; margin-bottom: 20px; }
+
+/* NEW: Interactive wrappers managing layered text overlays */
+.textarea-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+textarea, #recall-viewer { 
+    width: 100%; height: 160px; padding: 14px; font-size: 16px; line-height: 1.6; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box;
+}
+textarea { resize: vertical; display: block; transition: border-color 0.2s, box-shadow 0.2s; }
+textarea:focus, select:focus, input[type="text"]:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
+
+/* NEW: Modern interactive testing dashboard screen styling */
+#recall-viewer {
+    position: absolute; top: 0; left: 0; background: #ffffff; overflow-y: auto; display: block; white-space: pre-wrap; word-wrap: break-word;
+}
+#recall-viewer.hidden { display: none; }
+
+/* --- ACCELERATED ACTIVE RECALL LAYOUT ENGINE --- */
+#recall-viewer {
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    background: #ffffff; 
+    overflow-y: auto; 
+    display: block; 
+    white-space: pre-wrap; 
+    word-wrap: break-word;
+}
+#recall-viewer.hidden { display: none; }
+
+/* Base styling for all structured word tokens */
+.recall-word {
+    display: inline-block;
+    padding: 1px 2px;
+    margin: 0 1px;
+    border-radius: 4px;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+/* Master Hider Engine Rules: Leverages CSS selectors instead of slow JavaScript rebuilds */
+[data-stage="1"] .recall-word[data-mod3="2"]:not(.revealed),
+[data-stage="2"] .recall-word[data-mod3="1"]:not(.revealed),
+[data-stage="3"] .recall-word[data-mod3="0"]:not(.revealed),
+[data-stage="4"] .recall-word[data-rand="true"]:not(.revealed),
+[data-stage="5"] .recall-word:not(.revealed) {
+    background-color: #1f2937 !important; /* Premium dark-slate blackout texture color */
+    color: #1f2937 !important;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Sizing and focus colors when tapping a blacked-out word block marker to guess it */
+.recall-word.revealed {
+    background-color: #e0f2fe !important; 
+    color: #0369a1 !important; 
+    font-weight: 600;
+    cursor: pointer;
+}
+
+
+select, button, input[type="text"] { width: 100%; padding: 12px 14px; margin-bottom: 15px; font-size: 16px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; background-color: #ffffff; }
+input[type="range"] { width: 100%; margin-bottom: 0; -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer; }
+input[type="range"]::-webkit-slider-runnable-track { background: #e5e7eb; height: 6px; border-radius: 3px; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; background: #4f46e5; border-radius: 50%; height: 18px; width: 18px; margin-top: -6px; transition: transform 0.1s; }
+input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+
+.action-button-row { display: flex; gap: 10px; width: 100%; align-items: center; margin-bottom: 5px; }
+.action-button-row button { flex: 1; font-weight: 600; cursor: pointer; border: none; transition: background-color 0.15s, transform 0.1s; }
+.action-button-row button:active { transform: scale(0.98); }
+#read-btn { background-color: #4f46e5; color: #ffffff; }
+#read-btn:hover { background-color: #4338ca; }
+#loop-check { background-color: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+#loop-check:hover { background-color: #e5e7eb; }
+
+.slider-timer-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px; width: 100%; align-items: end; margin-bottom: 20px; background-color: #f9fafb; padding: 16px; border-radius: 8px; border: 1px solid #f3f4f6; box-sizing: border-box; }
+.slider-container, .timer-container, .reset-container { width: 100%; }
+.slider-label { display: block; }
+#speed-value { font-weight: 700; color: #4f46e5; margin-left: 4px; }
+#timer-display { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 16px; font-weight: 700; color: #111827; background-color: #ffffff; padding: 12px 5px; border-radius: 8px; border: 1px solid #d1d5db; text-align: center; display: block; width: 100%; box-sizing: border-box; }
+#timer-reset-btn { padding: 12px; margin-bottom: 0; background-color: #ffffff; color: #374151; font-weight: 600; border: 1px solid #d1d5db; border-radius: 8px; cursor: pointer; transition: background-color 0.15s; }
+#timer-reset-btn:hover { background-color: #f9fafb; }
+
+.filter-search-row { display: flex; gap: 12px; width: 100%; align-items: center; }
+#gender-filter { flex: 1; margin-bottom: 15px; background-color: #f3f4f6; border-color: transparent; font-weight: 600; color: #4b5563;}
+#voice-search { flex: 2; }
+
+#char-counter { position: absolute; top: 24px; right: 24px; font-size: 12px; font-weight: 600; line-height: 1.4; color: #6b7280; background-color: #f3f4f6; padding: 11px 15px; border-radius: 8px; border: none; z-index: 10; text-align: left; }
+.logo-container { display: flex; justify-content: flex-start; gap: 12px; margin-top: 15px; margin-bottom: -5px; }
+.logo-graphic, .crawfish-svg { position: relative; width: 44px; height: 38px; box-sizing: border-box; }
+.panda-logo { background-color: #f3f4f6; border: 3px solid #1f2937; border-radius: 50% 50% 45% 45%; }
+.panda-logo::before { content: ''; position: absolute; top: -8px; left: -6px; width: 14px; height: 14px; background-color: #1f2937; border-radius: 50%; box-shadow: 36px 0 0 0 #1f2937; z-index: -1; }
+.panda-logo::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at center, #1f2937 60%, transparent 65%) no-repeat 17px 18px / 5px 3px, radial-gradient(circle at center, #ffffff 50%, transparent 60%) no-repeat 10px 11px / 2px 2px, radial-gradient(circle at center, #1f2937 60%, transparent 70%) no-repeat 9px 10px / 4px 4px, radial-gradient(ellipse at center, #1f2937 65%, transparent 70%) no-repeat 6px 7px / 10px 11px, radial-gradient(circle at center, #ffffff 50%, transparent 60%) no-repeat 26px 11px / 2px 2px, radial-gradient(circle at center, #1f2937 60%, transparent 70%) no-repeat 25px 10px / 4px 4px, radial-gradient(ellipse at center, #1f2937 65%, transparent 70%) no-repeat 22px 7px / 10px 11px; }
+.crawfish-svg { display: inline-block; overflow: visible; }
+@media (min-width: 1024px) { body { width: 80%; padding: 32px; margin: 50px auto; } #char-counter { right: 32px; top: 32px; } }
