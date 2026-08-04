@@ -8,12 +8,12 @@ const loopCheck = document.getElementById('loop-check');
 const readBtn = document.getElementById('read-btn');
 const stopBtn = document.getElementById('stop-btn');
 const clearBtn = document.getElementById('clear-btn');
+const testVoiceBtn = document.getElementById('test-voice-btn'); // New element hook
 
 let allVoices = [];
 let filteredVoices = [];
 let isLoopEnabled = false;
 
-// Dynamic Toggle Tracking State Memory
 let currentUtterance = null;
 let lastCharacterIndex = 0;
 let isVoicePaused = false; 
@@ -57,11 +57,8 @@ loopCheck.addEventListener('click', () => {
     }
 });
 
-// --- DYNAMIC READ/PAUSE TOGGLE MANAGER ---
 readBtn.addEventListener('click', () => {
-    if (allVoices.length === 0) {
-        populateVoices();
-    }
+    if (allVoices.length === 0) populateVoices();
 
     if (synth.speaking && !isVoicePaused) {
         stopTimer();
@@ -92,13 +89,9 @@ function resetReadButtonState() {
 
 function populateVoices() {
     allVoices = synth.getVoices();
+    if (allVoices.length === 0) return;
     
-    // SMART SORTING: Sort alphabetically, but push native/local downloaded voices to the top of the list
-    allVoices.sort((a, b) => {
-        if (a.localService && !b.localService) return -1;
-        if (!a.localService && b.localService) return 1;
-        return a.name.localeCompare(b.name);
-    });
+    allVoices.sort((a, b) => a.name.localeCompare(b.name));
     
     const savedGenderFilter = localStorage.getItem('savedGenderFilter') || 'all';
     genderFilter.value = savedGenderFilter;
@@ -114,30 +107,26 @@ function populateVoices() {
 
     voiceSelect.innerHTML = '';
     
-    // FIXED: Retrieve your last saved voice selection from browser storage memory
-    const savedVoiceUri = localStorage.getItem('savedVoiceUri');
-    let selectedIndex = 0;
+    // --- STABLE PERSISTENCE LOGIC: Match by static voice name string ---
+    const savedVoiceName = localStorage.getItem('savedVoiceNameString');
+    let targetIndex = 0;
 
     filteredVoices.forEach((voice, i) => {
         const option = document.createElement('option');
         option.value = i;
         const genderTag = guessGender(voice.name).toUpperCase();
+        option.textContent = `${voice.name} (${voice.lang}) [${genderTag}]`;
         
-        // Visual Anchor: Tag fully downloaded local service voices so you know they are working offline
-        const localTag = voice.localService ? "✓ Local" : "Cloud";
-        option.textContent = `${voice.name} (${voice.lang}) [${genderTag}] [${localTag}]`;
-        
-        // If this voice matches the one we saved earlier, mark it to be selected
-        if (savedVoiceUri === voice.voiceURI) {
-            selectedIndex = i;
+        if (savedVoiceName === voice.name) {
+            targetIndex = i;
         }
         voiceSelect.appendChild(option);
     });
 
     if (filteredVoices.length > 0) {
-        voiceSelect.selectedIndex = selectedIndex;
-        // Lock choice immediately into system memory
-        localStorage.setItem('savedVoiceUri', filteredVoices[selectedIndex].voiceURI);
+        voiceSelect.selectedIndex = targetIndex;
+        // Lock the string name directly into storage safely
+        localStorage.setItem('savedVoiceNameString', filteredVoices[targetIndex].name);
     } else {
         const option = document.createElement('option');
         option.textContent = "No matches found";
@@ -145,27 +134,48 @@ function populateVoices() {
     }
 }
 
+// Aggressive startup polling loop ensures names are matched even on slow hardware loads
 if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = populateVoices;
 populateVoices();
 
-window.addEventListener('DOMContentLoaded', () => {
-    populateVoices();
-});
+const loopInterval = setInterval(() => {
+    if (allVoices.length === 0) {
+        populateVoices();
+    } else {
+        clearInterval(loopInterval);
+    }
+}, 250);
 
+window.addEventListener('DOMContentLoaded', populateVoices);
 voiceSearch.addEventListener('input', populateVoices);
 
 genderFilter.addEventListener('change', () => {
     localStorage.setItem('savedGenderFilter', genderFilter.value);
-    localStorage.removeItem('savedVoiceUri'); // Clear specific voice so it auto-selects top available match
+    localStorage.removeItem('savedVoiceNameString'); // Clear string focus to fall back gracefully
     populateVoices();
 });
 
-// FIXED: Listen for dropdown changes and permanently save your choice to localStorage
 voiceSelect.addEventListener('change', () => {
     const selectedVoice = filteredVoices[voiceSelect.value];
     if (selectedVoice) {
-        localStorage.setItem('savedVoiceUri', selectedVoice.voiceURI);
+        localStorage.setItem('savedVoiceNameString', selectedVoice.name);
     }
+});
+
+// --- NEW: QUICK AUDIO AUDIBILITY TEST TRIGGER ---
+testVoiceBtn.addEventListener('click', () => {
+    const selectedVoiceIndex = voiceSelect.value;
+    if (!filteredVoices[selectedVoiceIndex]) return;
+    
+    // Stop any current reading channel immediately
+    synth.cancel();
+    
+    // Create an isolated short audio sentence chunk test
+    const testUtterance = new SpeechSynthesisUtterance("Testing voice engine channel output.");
+    testUtterance.voice = filteredVoices[selectedVoiceIndex];
+    testUtterance.rate = 1.0;
+    
+    synth.speak(testUtterance);
 });
 
 speedSlider.addEventListener('input', () => {
