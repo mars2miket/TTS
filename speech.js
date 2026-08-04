@@ -1,4 +1,5 @@
 const synth = window.speechSynthesis;
+const textBox = document.getElementById('text-box'); 
 const genderFilter = document.getElementById('gender-filter');
 const voiceSearch = document.getElementById('voice-search'); 
 const voiceSelect = document.getElementById('voice-select');
@@ -56,7 +57,9 @@ loopCheck.addEventListener('click', () => {
     }
 });
 
+// --- DYNAMIC READ/PAUSE TOGGLE MANAGER ---
 readBtn.addEventListener('click', () => {
+    // Ultimate Check: If the list is still blank when the user taps read, pull them manually
     if (allVoices.length === 0) populateVoices();
 
     if (synth.speaking && !isVoicePaused) {
@@ -88,7 +91,8 @@ function resetReadButtonState() {
 
 function populateVoices() {
     allVoices = synth.getVoices();
-    if (allVoices.length === 0) return;
+    // If Android's speech service is sleeping and returns nothing, stop here so we don't break the layout
+    if (!allVoices || allVoices.length === 0) return;
     
     allVoices.sort((a, b) => a.name.localeCompare(b.name));
     
@@ -106,7 +110,6 @@ function populateVoices() {
 
     voiceSelect.innerHTML = '';
     
-    // --- STABLE PERSISTENCE LOGIC: Match by static voice name string ---
     const savedVoiceName = localStorage.getItem('savedVoiceNameString');
     let targetIndex = 0;
 
@@ -124,7 +127,6 @@ function populateVoices() {
 
     if (filteredVoices.length > 0) {
         voiceSelect.selectedIndex = targetIndex;
-        // Lock the string name directly into storage safely
         localStorage.setItem('savedVoiceNameString', filteredVoices[targetIndex].name);
     } else {
         const option = document.createElement('option');
@@ -133,24 +135,28 @@ function populateVoices() {
     }
 }
 
-// Aggressive startup polling loop ensures names are matched even on slow hardware loads
+// Android Core Fix: Standard browser trigger
 if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = populateVoices;
-populateVoices();
 
-const loopInterval = setInterval(() => {
-    if (allVoices.length === 0) {
-        populateVoices();
-    } else {
-        clearInterval(loopInterval);
-    }
-}, 250);
-
+// Android Core Fix 2: Layout ready trigger
 window.addEventListener('DOMContentLoaded', populateVoices);
+window.addEventListener('load', populateVoices);
+
+// FIXED: Android Heart-Beat Polling Engine
+// Keeps checking your phone every 500ms. The exact second Android wakes up, it loads the list and turns itself off safely.
+const androidVoiceHeartbeat = setInterval(() => {
+    allVoices = synth.getVoices();
+    if (allVoices && allVoices.length > 0) {
+        populateVoices();
+        clearInterval(androidVoiceHeartbeat); // Kill the loop once voices load successfully
+    }
+}, 500);
+
 voiceSearch.addEventListener('input', populateVoices);
 
 genderFilter.addEventListener('change', () => {
     localStorage.setItem('savedGenderFilter', genderFilter.value);
-    localStorage.removeItem('savedVoiceNameString'); // Clear string focus to fall back gracefully
+    localStorage.removeItem('savedVoiceNameString'); 
     populateVoices();
 });
 
@@ -160,7 +166,6 @@ voiceSelect.addEventListener('change', () => {
         localStorage.setItem('savedVoiceNameString', selectedVoice.name);
     }
 });
-
 
 speedSlider.addEventListener('input', () => {
     speedValue.textContent = `${speedSlider.value}x`;
