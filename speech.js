@@ -57,25 +57,22 @@ loopCheck.addEventListener('click', () => {
     }
 });
 
-// --- UPDATED: DYNAMIC READ/PAUSE TOGGLE MANAGER WITH ANDROID FAIL-SAFE ---
+// --- DYNAMIC READ/PAUSE TOGGLE MANAGER ---
 readBtn.addEventListener('click', () => {
-    // Fail-safe: Force Android to refresh the voice list right when clicking read if it's empty
     if (allVoices.length === 0) {
         populateVoices();
     }
 
     if (synth.speaking && !isVoicePaused) {
-        // Condition A: It is actively speaking -> Freeze it and change button to Play state
         stopTimer();
         synth.cancel();
         isVoicePaused = true;
         readBtn.textContent = "Read";
         readBtn.style.backgroundColor = ""; 
     } else if (isVoicePaused) {
-        // Condition B: It is paused -> Resume text reading where it left off
         isVoicePaused = false;
         readBtn.textContent = "Pause ⏸";
-        readBtn.style.backgroundColor = "#fef08a"; // Distinct light-yellow active highlight
+        readBtn.style.backgroundColor = "#fef08a"; 
         
         const fullText = textBox.value;
         const remainingText = fullText.substring(lastCharacterIndex);
@@ -83,7 +80,6 @@ readBtn.addEventListener('click', () => {
             speakText(remainingText, true);
         }
     } else {
-        // Condition C: It is fully stopped -> Start fresh reading from index zero
         speakText();
     }
 });
@@ -96,7 +92,13 @@ function resetReadButtonState() {
 
 function populateVoices() {
     allVoices = synth.getVoices();
-    allVoices.sort((a, b) => a.name.localeCompare(b.name));
+    
+    // SMART SORTING: Sort alphabetically, but push native/local downloaded voices to the top of the list
+    allVoices.sort((a, b) => {
+        if (a.localService && !b.localService) return -1;
+        if (!a.localService && b.localService) return 1;
+        return a.name.localeCompare(b.name);
+    });
     
     const savedGenderFilter = localStorage.getItem('savedGenderFilter') || 'all';
     genderFilter.value = savedGenderFilter;
@@ -111,6 +113,8 @@ function populateVoices() {
     });
 
     voiceSelect.innerHTML = '';
+    
+    // FIXED: Retrieve your last saved voice selection from browser storage memory
     const savedVoiceUri = localStorage.getItem('savedVoiceUri');
     let selectedIndex = 0;
 
@@ -118,13 +122,22 @@ function populateVoices() {
         const option = document.createElement('option');
         option.value = i;
         const genderTag = guessGender(voice.name).toUpperCase();
-        option.textContent = `${voice.name} (${voice.lang}) [${genderTag}]`;
-        if (savedVoiceUri === voice.voiceURI) selectedIndex = i;
+        
+        // Visual Anchor: Tag fully downloaded local service voices so you know they are working offline
+        const localTag = voice.localService ? "✓ Local" : "Cloud";
+        option.textContent = `${voice.name} (${voice.lang}) [${genderTag}] [${localTag}]`;
+        
+        // If this voice matches the one we saved earlier, mark it to be selected
+        if (savedVoiceUri === voice.voiceURI) {
+            selectedIndex = i;
+        }
         voiceSelect.appendChild(option);
     });
 
     if (filteredVoices.length > 0) {
         voiceSelect.selectedIndex = selectedIndex;
+        // Lock choice immediately into system memory
+        localStorage.setItem('savedVoiceUri', filteredVoices[selectedIndex].voiceURI);
     } else {
         const option = document.createElement('option');
         option.textContent = "No matches found";
@@ -135,21 +148,24 @@ function populateVoices() {
 if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = populateVoices;
 populateVoices();
 
-// --- UPDATED: FORCED ANDROID STARTUP TRIGGER ---
-// Force Android to load voices immediately when the app layout boots up
 window.addEventListener('DOMContentLoaded', () => {
     populateVoices();
 });
 
 voiceSearch.addEventListener('input', populateVoices);
+
 genderFilter.addEventListener('change', () => {
     localStorage.setItem('savedGenderFilter', genderFilter.value);
-    localStorage.removeItem('savedVoiceUri');
+    localStorage.removeItem('savedVoiceUri'); // Clear specific voice so it auto-selects top available match
     populateVoices();
 });
+
+// FIXED: Listen for dropdown changes and permanently save your choice to localStorage
 voiceSelect.addEventListener('change', () => {
     const selectedVoice = filteredVoices[voiceSelect.value];
-    if (selectedVoice) localStorage.setItem('savedTextBoxContent', textBox.value);
+    if (selectedVoice) {
+        localStorage.setItem('savedVoiceUri', selectedVoice.voiceURI);
+    }
 });
 
 speedSlider.addEventListener('input', () => {
@@ -178,7 +194,9 @@ function speakText(textOverride = null, isMidSentenceResume = false) {
 
     currentUtterance = new SpeechSynthesisUtterance(textToRead);
     const selectedVoiceIndex = voiceSelect.value;
-    if (filteredVoices[selectedVoiceIndex]) currentUtterance.voice = filteredVoices[selectedVoiceIndex];
+    if (filteredVoices[selectedVoiceIndex]) {
+        currentUtterance.voice = filteredVoices[selectedVoiceIndex];
+    }
 
     currentUtterance.rate = parseFloat(speedSlider.value);
     startTimer();
