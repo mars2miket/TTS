@@ -90,27 +90,28 @@ function resetReadButtonState() {
 
 function populateVoices() {
     const freshVoices = synth.getVoices();
-    // Only update our master array if the browser actually returned a valid voice list
     if (!freshVoices || freshVoices.length === 0) return;
     
-    // Prevent useless re-renders if the list length has not changed
-    if (freshVoices.length === allVoices.length) return;
-    
+    // REPAIRED: Removed the strict length check that was choking desktop Edge updates
     allVoices = freshVoices;
-    allVoices.sort((a, b) => a.name.localeCompare(b.name));
+    
+    // Sort array elements alphabetically 
+    const uniqueVoices = [...allVoices].sort((a, b) => a.name.localeCompare(b.name));
     
     const savedGenderFilter = localStorage.getItem('savedGenderFilter') || 'all';
     genderFilter.value = savedGenderFilter;
 
     const searchQuery = voiceSearch.value.toLowerCase().trim();
 
-    filteredVoices = allVoices.filter(voice => {
+    filteredVoices = uniqueVoices.filter(voice => {
         const matchesGender = (savedGenderFilter === 'all') || (guessGender(voice.name) === savedGenderFilter);
         const voiceContent = `${voice.name} ${voice.lang}`.toLowerCase();
         const matchesSearch = voiceContent.includes(searchQuery);
         return matchesGender && matchesSearch;
     });
 
+    // Store current visual scroll position or select focus to avoid jarring cursor jumps
+    const previousSelection = voiceSelect.value;
     voiceSelect.innerHTML = '';
     
     const savedVoiceName = localStorage.getItem('savedVoiceNameString');
@@ -138,7 +139,7 @@ function populateVoices() {
     }
 }
 
-// Fixed Android & Desktop Multi-Trigger Engine Links
+// Global Browser Standard Event Handler
 if (synth.onvoiceschanged !== undefined) {
     synth.onvoiceschanged = () => populateVoices();
 }
@@ -146,14 +147,12 @@ if (synth.onvoiceschanged !== undefined) {
 window.addEventListener('DOMContentLoaded', populateVoices);
 window.addEventListener('load', populateVoices);
 
-// --- UNIVERSAL BACKGROUND MONITOR LOOP ---
-// Fires safely on both mobile and desktop. Checks 6 times across 3 seconds 
-// to gracefully capture both late-loading Android engines and desktop updates.
+// --- SAFELY MONITOR PIPELINE WITH UN-THROTTLED RE-RENDERING ---
 let checkCount = 0;
 const masterVoiceMonitor = setInterval(() => {
     populateVoices();
     checkCount++;
-    if (checkCount >= 6) {
+    if (checkCount >= 10) { // Monitors for a full 5 seconds to catch all lazy cloud payloads
         clearInterval(masterVoiceMonitor);
     }
 }, 500);
