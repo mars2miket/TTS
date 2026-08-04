@@ -8,7 +8,6 @@ const loopCheck = document.getElementById('loop-check');
 const readBtn = document.getElementById('read-btn');
 const stopBtn = document.getElementById('stop-btn');
 const clearBtn = document.getElementById('clear-btn');
-const testVoiceBtn = document.getElementById('test-voice-btn'); // New element hook
 
 let allVoices = [];
 let filteredVoices = [];
@@ -107,7 +106,6 @@ function populateVoices() {
 
     voiceSelect.innerHTML = '';
     
-    // --- STABLE PERSISTENCE LOGIC: Match by static voice name string ---
     const savedVoiceName = localStorage.getItem('savedVoiceNameString');
     let targetIndex = 0;
 
@@ -125,7 +123,6 @@ function populateVoices() {
 
     if (filteredVoices.length > 0) {
         voiceSelect.selectedIndex = targetIndex;
-        // Lock the string name directly into storage safely
         localStorage.setItem('savedVoiceNameString', filteredVoices[targetIndex].name);
     } else {
         const option = document.createElement('option');
@@ -134,7 +131,6 @@ function populateVoices() {
     }
 }
 
-// Aggressive startup polling loop ensures names are matched even on slow hardware loads
 if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = populateVoices;
 populateVoices();
 
@@ -151,7 +147,7 @@ voiceSearch.addEventListener('input', populateVoices);
 
 genderFilter.addEventListener('change', () => {
     localStorage.setItem('savedGenderFilter', genderFilter.value);
-    localStorage.removeItem('savedVoiceNameString'); // Clear string focus to fall back gracefully
+    localStorage.removeItem('savedVoiceNameString'); 
     populateVoices();
 });
 
@@ -160,22 +156,6 @@ voiceSelect.addEventListener('change', () => {
     if (selectedVoice) {
         localStorage.setItem('savedVoiceNameString', selectedVoice.name);
     }
-});
-
-// --- NEW: QUICK AUDIO AUDIBILITY TEST TRIGGER ---
-testVoiceBtn.addEventListener('click', () => {
-    const selectedVoiceIndex = voiceSelect.value;
-    if (!filteredVoices[selectedVoiceIndex]) return;
-    
-    // Stop any current reading channel immediately
-    synth.cancel();
-    
-    // Create an isolated short audio sentence chunk test
-    const testUtterance = new SpeechSynthesisUtterance("Testing voice engine channel output.");
-    testUtterance.voice = filteredVoices[selectedVoiceIndex];
-    testUtterance.rate = 1.0;
-    
-    synth.speak(testUtterance);
 });
 
 speedSlider.addEventListener('input', () => {
