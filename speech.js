@@ -89,29 +89,24 @@ function resetReadButtonState() {
 }
 
 function populateVoices() {
-    const freshVoices = synth.getVoices();
-    if (!freshVoices || freshVoices.length === 0) return;
+    // Standard direct call to fetch voices
+    allVoices = synth.getVoices();
+    if (!allVoices || allVoices.length === 0) return;
     
-    // REPAIRED: Removed the strict length check that was choking desktop Edge updates
-    allVoices = freshVoices;
-    
-    // Sort array elements alphabetically 
-    const uniqueVoices = [...allVoices].sort((a, b) => a.name.localeCompare(b.name));
+    allVoices.sort((a, b) => a.name.localeCompare(b.name));
     
     const savedGenderFilter = localStorage.getItem('savedGenderFilter') || 'all';
     genderFilter.value = savedGenderFilter;
 
     const searchQuery = voiceSearch.value.toLowerCase().trim();
 
-    filteredVoices = uniqueVoices.filter(voice => {
+    filteredVoices = allVoices.filter(voice => {
         const matchesGender = (savedGenderFilter === 'all') || (guessGender(voice.name) === savedGenderFilter);
         const voiceContent = `${voice.name} ${voice.lang}`.toLowerCase();
         const matchesSearch = voiceContent.includes(searchQuery);
         return matchesGender && matchesSearch;
     });
 
-    // Store current visual scroll position or select focus to avoid jarring cursor jumps
-    const previousSelection = voiceSelect.value;
     voiceSelect.innerHTML = '';
     
     const savedVoiceName = localStorage.getItem('savedVoiceNameString');
@@ -139,23 +134,14 @@ function populateVoices() {
     }
 }
 
-// Global Browser Standard Event Handler
+// THE CLEAN STANDARD ASSIGNMENT: Let the browser fire this event naturally when ready
 if (synth.onvoiceschanged !== undefined) {
-    synth.onvoiceschanged = () => populateVoices();
+    synth.onvoiceschanged = populateVoices;
 }
 
+// Initial triggers
+populateVoices();
 window.addEventListener('DOMContentLoaded', populateVoices);
-window.addEventListener('load', populateVoices);
-
-// --- SAFELY MONITOR PIPELINE WITH UN-THROTTLED RE-RENDERING ---
-let checkCount = 0;
-const masterVoiceMonitor = setInterval(() => {
-    populateVoices();
-    checkCount++;
-    if (checkCount >= 10) { // Monitors for a full 5 seconds to catch all lazy cloud payloads
-        clearInterval(masterVoiceMonitor);
-    }
-}, 500);
 
 voiceSearch.addEventListener('input', populateVoices);
 
