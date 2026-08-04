@@ -1,5 +1,4 @@
 const synth = window.speechSynthesis;
-const textBox = document.getElementById('text-box'); 
 const genderFilter = document.getElementById('gender-filter');
 const voiceSearch = document.getElementById('voice-search'); 
 const voiceSelect = document.getElementById('voice-select');
@@ -57,7 +56,6 @@ loopCheck.addEventListener('click', () => {
     }
 });
 
-// --- DYNAMIC READ/PAUSE TOGGLE MANAGER ---
 readBtn.addEventListener('click', () => {
     if (allVoices.length === 0) populateVoices();
 
@@ -89,9 +87,8 @@ function resetReadButtonState() {
 }
 
 function populateVoices() {
-    // Standard direct call to fetch voices
     allVoices = synth.getVoices();
-    if (!allVoices || allVoices.length === 0) return;
+    if (allVoices.length === 0) return;
     
     allVoices.sort((a, b) => a.name.localeCompare(b.name));
     
@@ -109,6 +106,7 @@ function populateVoices() {
 
     voiceSelect.innerHTML = '';
     
+    // --- STABLE PERSISTENCE LOGIC: Match by static voice name string ---
     const savedVoiceName = localStorage.getItem('savedVoiceNameString');
     let targetIndex = 0;
 
@@ -126,6 +124,7 @@ function populateVoices() {
 
     if (filteredVoices.length > 0) {
         voiceSelect.selectedIndex = targetIndex;
+        // Lock the string name directly into storage safely
         localStorage.setItem('savedVoiceNameString', filteredVoices[targetIndex].name);
     } else {
         const option = document.createElement('option');
@@ -134,20 +133,24 @@ function populateVoices() {
     }
 }
 
-// THE CLEAN STANDARD ASSIGNMENT: Let the browser fire this event naturally when ready
-if (synth.onvoiceschanged !== undefined) {
-    synth.onvoiceschanged = populateVoices;
-}
-
-// Initial triggers
+// Aggressive startup polling loop ensures names are matched even on slow hardware loads
+if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = populateVoices;
 populateVoices();
-window.addEventListener('DOMContentLoaded', populateVoices);
 
+const loopInterval = setInterval(() => {
+    if (allVoices.length === 0) {
+        populateVoices();
+    } else {
+        clearInterval(loopInterval);
+    }
+}, 250);
+
+window.addEventListener('DOMContentLoaded', populateVoices);
 voiceSearch.addEventListener('input', populateVoices);
 
 genderFilter.addEventListener('change', () => {
     localStorage.setItem('savedGenderFilter', genderFilter.value);
-    localStorage.removeItem('savedVoiceNameString'); 
+    localStorage.removeItem('savedVoiceNameString'); // Clear string focus to fall back gracefully
     populateVoices();
 });
 
@@ -157,6 +160,7 @@ voiceSelect.addEventListener('change', () => {
         localStorage.setItem('savedVoiceNameString', selectedVoice.name);
     }
 });
+
 
 speedSlider.addEventListener('input', () => {
     speedValue.textContent = `${speedSlider.value}x`;
