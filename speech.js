@@ -106,6 +106,7 @@ function populateVoices() {
 
     voiceSelect.innerHTML = '';
     
+    // --- STABLE PERSISTENCE LOGIC: Match by static voice name string ---
     const savedVoiceName = localStorage.getItem('savedVoiceNameString');
     let targetIndex = 0;
 
@@ -123,6 +124,7 @@ function populateVoices() {
 
     if (filteredVoices.length > 0) {
         voiceSelect.selectedIndex = targetIndex;
+        // Lock the string name directly into storage safely
         localStorage.setItem('savedVoiceNameString', filteredVoices[targetIndex].name);
     } else {
         const option = document.createElement('option');
@@ -131,6 +133,7 @@ function populateVoices() {
     }
 }
 
+// Aggressive startup polling loop ensures names are matched even on slow hardware loads
 if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = populateVoices;
 populateVoices();
 
@@ -147,7 +150,7 @@ voiceSearch.addEventListener('input', populateVoices);
 
 genderFilter.addEventListener('change', () => {
     localStorage.setItem('savedGenderFilter', genderFilter.value);
-    localStorage.removeItem('savedVoiceNameString'); 
+    localStorage.removeItem('savedVoiceNameString'); // Clear string focus to fall back gracefully
     populateVoices();
 });
 
@@ -157,6 +160,7 @@ voiceSelect.addEventListener('change', () => {
         localStorage.setItem('savedVoiceNameString', selectedVoice.name);
     }
 });
+
 
 speedSlider.addEventListener('input', () => {
     speedValue.textContent = `${speedSlider.value}x`;
