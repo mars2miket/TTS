@@ -59,7 +59,6 @@ loopCheck.addEventListener('click', () => {
 
 // --- DYNAMIC READ/PAUSE TOGGLE MANAGER ---
 readBtn.addEventListener('click', () => {
-    // Ultimate Check: If the list is still blank when the user taps read, pull them manually
     if (allVoices.length === 0) populateVoices();
 
     if (synth.speaking && !isVoicePaused) {
@@ -90,10 +89,14 @@ function resetReadButtonState() {
 }
 
 function populateVoices() {
-    allVoices = synth.getVoices();
-    // If Android's speech service is sleeping and returns nothing, stop here so we don't break the layout
-    if (!allVoices || allVoices.length === 0) return;
+    const freshVoices = synth.getVoices();
+    // Only update our master array if the browser actually returned a valid voice list
+    if (!freshVoices || freshVoices.length === 0) return;
     
+    // Prevent useless re-renders if the list length has not changed
+    if (freshVoices.length === allVoices.length) return;
+    
+    allVoices = freshVoices;
     allVoices.sort((a, b) => a.name.localeCompare(b.name));
     
     const savedGenderFilter = localStorage.getItem('savedGenderFilter') || 'all';
@@ -135,20 +138,23 @@ function populateVoices() {
     }
 }
 
-// Android Core Fix: Standard browser trigger
-if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = populateVoices;
+// Fixed Android & Desktop Multi-Trigger Engine Links
+if (synth.onvoiceschanged !== undefined) {
+    synth.onvoiceschanged = () => populateVoices();
+}
 
-// Android Core Fix 2: Layout ready trigger
 window.addEventListener('DOMContentLoaded', populateVoices);
 window.addEventListener('load', populateVoices);
 
-// FIXED: Android Heart-Beat Polling Engine
-// Keeps checking your phone every 500ms. The exact second Android wakes up, it loads the list and turns itself off safely.
-const androidVoiceHeartbeat = setInterval(() => {
-    allVoices = synth.getVoices();
-    if (allVoices && allVoices.length > 0) {
-        populateVoices();
-        clearInterval(androidVoiceHeartbeat); // Kill the loop once voices load successfully
+// --- UNIVERSAL BACKGROUND MONITOR LOOP ---
+// Fires safely on both mobile and desktop. Checks 6 times across 3 seconds 
+// to gracefully capture both late-loading Android engines and desktop updates.
+let checkCount = 0;
+const masterVoiceMonitor = setInterval(() => {
+    populateVoices();
+    checkCount++;
+    if (checkCount >= 6) {
+        clearInterval(masterVoiceMonitor);
     }
 }, 500);
 
