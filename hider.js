@@ -16,16 +16,22 @@ function preRenderTextGrid() {
     recallViewer.innerHTML = ''; // Single hard wipe execution
     
     const paragraphs = textBox.value.split('\n');
-    
+    let runningIndex = 0; // tracks absolute offset into textBox.value as we walk the same split that built it
+
     paragraphs.forEach((para, pIdx) => {
         const words = para.split(' ');
         
         words.forEach((word, wIdx) => {
+            const wordStart = runningIndex;
+            runningIndex += word.length + 1; // +1 accounts for the space (or newline) that followed this word
+
             if (!word.trim()) return;
             
             const span = document.createElement('span');
             span.className = "recall-word";
             span.textContent = word;
+            span.dataset.start = wordStart;
+            span.dataset.end = wordStart + word.length;
             
             // Inject structural position indices directly into HTML text data tags
             span.setAttribute('data-mod3', wIdx % 3);
@@ -85,6 +91,18 @@ hiderBtn.addEventListener('click', () => {
         resetHideMode();
     }
 });
+
+// Finds the pre-rendered word span covering a given absolute character index in textBox.value.
+// Used by speech.js to highlight the word currently being spoken.
+function getWordSpanAtIndex(charIndex) {
+    const spans = recallViewer.getElementsByClassName('recall-word');
+    for (const span of spans) {
+        const start = Number(span.dataset.start);
+        const end = Number(span.dataset.end);
+        if (charIndex >= start && charIndex < end) return span;
+    }
+    return null;
+}
 
 function resetHideMode() {
     hideStage = 0;

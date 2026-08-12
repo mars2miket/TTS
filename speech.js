@@ -8,6 +8,8 @@ const loopCheck = document.getElementById('loop-check');
 const readBtn = document.getElementById('read-btn');
 const stopBtn = document.getElementById('stop-btn');
 const clearBtn = document.getElementById('clear-btn');
+const rewindBtn = document.getElementById('rewind-btn');
+const forwardBtn = document.getElementById('forward-btn');
 
 let allVoices = [];
 let filteredVoices = [];
@@ -16,6 +18,10 @@ let isLoopEnabled = false;
 let currentUtterance = null;
 let lastCharacterIndex = 0;
 let isVoicePaused = false; 
+
+let currentSpeakingSpan = null; // the word span currently highlighted as "being read"
+let didAutoShowViewer = false;  // whether we temporarily revealed the recall-viewer just to show the highlight
+const SEEK_WORD_COUNT = 5;      // how many words Rewind/Fast Forward jump per press
 
 const femaleKeywords = [ 
     'adri', 'amala', 'andrea', 'anna', 'aria', 'asilia', 'ava', 'belkys', 
@@ -40,6 +46,7 @@ clearBtn.addEventListener('click', () => {
     stopTimer(); 
     resetReadButtonState();
     lastCharacterIndex = 0;
+    stopHighlighting();
     if (typeof resetHideMode === 'function') {
         resetHideMode();
     }
@@ -47,13 +54,8 @@ clearBtn.addEventListener('click', () => {
 
 loopCheck.addEventListener('click', () => {
     isLoopEnabled = !isLoopEnabled;
-    if (isLoopEnabled) {
-        loopCheck.textContent = "Loop: ON";
-        loopCheck.style.backgroundColor = "#fff9c4";
-    } else {
-        loopCheck.textContent = "Loop: OFF";
-        loopCheck.style.backgroundColor = "";
-    }
+    loopCheck.textContent = isLoopEnabled ? "Loop: ON" : "Loop: OFF";
+    loopCheck.classList.toggle('loop-on', isLoopEnabled);
 });
 
 readBtn.addEventListener('click', () => {
@@ -64,11 +66,11 @@ readBtn.addEventListener('click', () => {
         synth.cancel();
         isVoicePaused = true;
         readBtn.textContent = "Read";
-        readBtn.style.backgroundColor = ""; 
+        readBtn.classList.remove('is-active');
     } else if (isVoicePaused) {
         isVoicePaused = false;
         readBtn.textContent = "Pause ⏸";
-        readBtn.style.backgroundColor = "#fef08a"; 
+        readBtn.classList.add('is-active');
         
         const fullText = textBox.value;
         const remainingText = fullText.substring(lastCharacterIndex);
@@ -83,7 +85,46 @@ readBtn.addEventListener('click', () => {
 function resetReadButtonState() {
     isVoicePaused = false;
     readBtn.textContent = "Read";
-    readBtn.style.backgroundColor = "";
+    readBtn.classList.remove('is-active');
+}
+
+// --- Read-along word highlighting ---
+// Reuses the recall-viewer overlay (built by hider.js) so the currently-spoken
+// word can be highlighted without a second overlapping overlay. Only runs
+// when Hide Words mode isn't actively hiding text, to avoid the two features fighting.
+function clearSpeakingHighlight() {
+    if (currentSpeakingSpan) {
+        currentSpeakingSpan.classList.remove('speaking');
+        currentSpeakingSpan = null;
+    }
+}
+
+function highlightWordAt(absoluteIndex) {
+    if (typeof hideStage !== 'undefined' && hideStage > 0) return;
+    if (typeof recallViewer === 'undefined' || typeof preRenderTextGrid !== 'function') return;
+
+    if (isTextDirty) preRenderTextGrid();
+
+    if (recallViewer.classList.contains('hidden')) {
+        recallViewer.style.height = `${textBox.offsetHeight}px`;
+        recallViewer.classList.remove('hidden');
+        didAutoShowViewer = true;
+    }
+
+    const span = (typeof getWordSpanAtIndex === 'function') ? getWordSpanAtIndex(absoluteIndex) : null;
+    if (span && span !== currentSpeakingSpan) {
+        clearSpeakingHighlight();
+        span.classList.add('speaking');
+        currentSpeakingSpan = span;
+    }
+}
+
+function stopHighlighting() {
+    clearSpeakingHighlight();
+    if (didAutoShowViewer) {
+        recallViewer.classList.add('hidden');
+        didAutoShowViewer = false;
+    }
 }
 
 function populateVoices() {
@@ -184,7 +225,11 @@ function speakText(textOverride = null, isMidSentenceResume = false) {
     if (!textToRead.trim()) return;
 
     readBtn.textContent = "Pause ⏸";
-    readBtn.style.backgroundColor = "#fef08a";
+    readBtn.classList.add('is-active');
+
+    // Absolute offset (within the full textarea value) where this utterance's text begins.
+    // Fresh reads start at 0; resumes/seeks start wherever lastCharacterIndex already points.
+    const utteranceBaseIndex = isMidSentenceResume ? lastCharacterIndex : 0;
 
     currentUtterance = new SpeechSynthesisUtterance(textToRead);
     const selectedVoiceIndex = voiceSelect.value;
@@ -197,7 +242,9 @@ function speakText(textOverride = null, isMidSentenceResume = false) {
 
     currentUtterance.onboundary = (event) => {
         if (event.name === 'word') {
-            lastCharacterIndex = isMidSentenceResume ? lastCharacterIndex + event.charIndex : event.charIndex;
+            const absoluteIndex = utteranceBaseIndex + event.charIndex;
+            lastCharacterIndex = absoluteIndex;
+            highlightWordAt(absoluteIndex);
         }
     };
 
@@ -211,6 +258,7 @@ function speakText(textOverride = null, isMidSentenceResume = false) {
                 stopTimer(); 
                 lastCharacterIndex = 0;
                 resetReadButtonState();
+                stopHighlighting();
             }
         }
     };
@@ -218,12 +266,58 @@ function speakText(textOverride = null, isMidSentenceResume = false) {
     synth.speak(currentUtterance);
 }
 
+// --- Fast Forward / Rewind ---
+// Jumps playback position by whole words in either direction. If speech is
+// actively playing, it restarts immediately from the new spot; if paused or
+// stopped, it just moves the resume point (and the highlight, if visible).
+function skipWordsFrom(fromIndex, wordDelta) {
+    const text = textBox.value;
+    let idx = fromIndex;
+
+    if (wordDelta > 0) {
+        for (let i = 0; i < wordDelta; i++) {
+            while (idx < text.length && !/\s/.test(text[idx])) idx++;
+            while (idx < text.length && /\s/.test(text[idx])) idx++;
+        }
+    } else {
+        for (let i = 0; i < -wordDelta; i++) {
+            while (idx > 0 && /\s/.test(text[idx - 1])) idx--;
+            while (idx > 0 && !/\s/.test(text[idx - 1])) idx--;
+        }
+    }
+    return Math.max(0, Math.min(idx, text.length));
+}
+
+function seekBy(wordDelta) {
+    const wasActive = synth.speaking && !isVoicePaused;
+    const newIndex = skipWordsFrom(lastCharacterIndex, wordDelta);
+    lastCharacterIndex = newIndex;
+
+    if (wasActive) {
+        stopTimer();
+        synth.cancel();
+        const remaining = textBox.value.substring(newIndex);
+        if (remaining.trim() !== "") {
+            speakText(remaining, true);
+        } else {
+            resetReadButtonState();
+            stopHighlighting();
+        }
+    } else {
+        highlightWordAt(newIndex);
+    }
+}
+
+rewindBtn.addEventListener('click', () => seekBy(-SEEK_WORD_COUNT));
+forwardBtn.addEventListener('click', () => seekBy(SEEK_WORD_COUNT));
+
 stopBtn.addEventListener('click', () => {
     isLoopEnabled = false;
     loopCheck.textContent = "Loop: OFF";
-    loopCheck.style.backgroundColor = "";
+    loopCheck.classList.remove('loop-on');
     synth.cancel();
     stopTimer(); 
     resetReadButtonState();
     lastCharacterIndex = 0; 
+    stopHighlighting();
 });
