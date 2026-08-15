@@ -24,9 +24,6 @@ let didAutoShowViewer = false;  // whether we temporarily revealed the recall-vi
 const SEEK_WORD_COUNT = 5;      // how many words Rewind/Fast Forward jump per press
 
 // --- Chunked playback (fixes mobile browsers cutting off / failing on long utterances) ---
-// Many mobile TTS engines (notably Android Chrome) silently fail once a single
-// utterance passes roughly 4000 characters. To stay safe across devices, any text
-// being read is split into smaller pieces and played back-to-back as a queue.
 // Kept intentionally small (well under the ~4000-char mobile safety limit).
 // Mobile browsers (notably Android Chrome) often don't fire onboundary word
 // events reliably, so lastCharacterIndex can't always be tracked word-by-word
@@ -105,9 +102,6 @@ function resetReadButtonState() {
 }
 
 // --- Read-along word highlighting ---
-// Reuses the recall-viewer overlay (built by hider.js) so the currently-spoken
-// word can be highlighted without a second overlapping overlay. Only runs
-// when Hide Words mode isn't actively hiding text, to avoid the two features fighting.
 function clearSpeakingHighlight() {
     if (currentSpeakingSpan) {
         currentSpeakingSpan.classList.remove('speaking');
@@ -163,7 +157,6 @@ function populateVoices() {
 
     voiceSelect.innerHTML = '';
     
-    // --- STABLE PERSISTENCE LOGIC: Match by static voice name string ---
     const savedVoiceName = localStorage.getItem('savedVoiceNameString');
     let targetIndex = 0;
 
@@ -181,7 +174,6 @@ function populateVoices() {
 
     if (filteredVoices.length > 0) {
         voiceSelect.selectedIndex = targetIndex;
-        // Lock the string name directly into storage safely
         localStorage.setItem('savedVoiceNameString', filteredVoices[targetIndex].name);
     } else {
         const option = document.createElement('option');
@@ -207,7 +199,7 @@ voiceSearch.addEventListener('input', () => {
 
 genderFilter.addEventListener('change', () => {
     localStorage.setItem('savedGenderFilter', genderFilter.value);
-    localStorage.removeItem('savedVoiceNameString'); // Clear string focus to fall back gracefully
+    localStorage.removeItem('savedVoiceNameString');
     populateVoices();
 });
 
@@ -217,7 +209,6 @@ voiceSelect.addEventListener('change', () => {
         localStorage.setItem('savedVoiceNameString', selectedVoice.name);
     }
 });
-
 
 speedSlider.addEventListener('input', () => {
     speedValue.textContent = `${speedSlider.value}x`;
@@ -248,7 +239,6 @@ function splitIntoChunks(text, maxLen) {
         const searchEnd = start + maxLen;
         let splitAt = -1;
 
-        // Prefer splitting right after sentence-ending punctuation
         for (let i = searchEnd; i > start; i--) {
             if (/[.!?]/.test(text[i - 1])) {
                 splitAt = i;
@@ -256,7 +246,6 @@ function splitIntoChunks(text, maxLen) {
             }
         }
 
-        // Fall back to splitting at the nearest whitespace
         if (splitAt === -1) {
             for (let i = searchEnd; i > start; i--) {
                 if (/\s/.test(text[i])) {
@@ -266,7 +255,6 @@ function splitIntoChunks(text, maxLen) {
             }
         }
 
-        // Last resort: hard cut at the limit
         if (splitAt === -1 || splitAt <= start) {
             splitAt = searchEnd;
         }
@@ -294,8 +282,6 @@ function speakText(textOverride = null, isMidSentenceResume = false) {
     readBtn.textContent = "Pause ⏸";
     readBtn.classList.add('is-active');
 
-    // Absolute offset (within the full textarea value) where this utterance's text begins.
-    // Fresh reads start at 0; resumes/seeks start wherever lastCharacterIndex already points.
     const utteranceBaseIndex = isMidSentenceResume ? lastCharacterIndex : 0;
 
     speechChunks = splitIntoChunks(textToRead, CHUNK_CHAR_LIMIT);
@@ -334,8 +320,6 @@ function playCurrentChunk() {
 
     currentUtterance.onend = () => {
         if (isChunkTransitionCancelled) {
-            // This end was caused by a manual cancel (pause/stop/seek/speed change),
-            // not natural completion — don't auto-advance to the next chunk.
             isChunkTransitionCancelled = false;
             return;
         }
@@ -366,9 +350,6 @@ function finishReading() {
 }
 
 // --- Fast Forward / Rewind ---
-// Jumps playback position by whole words in either direction. If speech is
-// actively playing, it restarts immediately from the new spot; if paused or
-// stopped, it just moves the resume point (and the highlight, if visible).
 function skipWordsFrom(fromIndex, wordDelta) {
     const text = textBox.value;
     let idx = fromIndex;
