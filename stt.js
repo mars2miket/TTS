@@ -22,6 +22,8 @@
 
   let isListening = false;
 
+let lastFinalTranscript = "";
+
   recognition.onresult = (event) => {
     let finalTranscript = "";
     for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -29,10 +31,20 @@
         finalTranscript += event.results[i][0].transcript;
       }
     }
-    if (finalTranscript) {
-      // Append recognized speech to whatever is already in the box
-      textBox.value += (textBox.value.endsWith(" ") || textBox.value === "" ? "" : " ") + finalTranscript.trim() + " ";
-      textBox.dispatchEvent(new Event("input")); // triggers char counter / timer updates if listening for input
+    finalTranscript = finalTranscript.trim();
+
+    // Skip if this is a duplicate of the last chunk we already added
+    if (finalTranscript && finalTranscript !== lastFinalTranscript) {
+      textBox.value += (textBox.value.endsWith(" ") || textBox.value === "" ? "" : " ") + finalTranscript + " ";
+      textBox.dispatchEvent(new Event("input"));
+      lastFinalTranscript = finalTranscript;
+    }
+  };
+
+  recognition.onend = () => {
+    if (isListening) {
+      lastFinalTranscript = ""; // reset dedupe tracker on restart
+      recognition.start();
     }
   };
 
@@ -41,12 +53,7 @@
     stopListening();
   };
 
-  recognition.onend = () => {
-    // Restart automatically if user hasn't manually stopped (keeps it running like continuous dictation)
-    if (isListening) {
-      recognition.start();
-    }
-  };
+
 
   function startListening() {
     isListening = true;
