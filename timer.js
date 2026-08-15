@@ -10,7 +10,7 @@ let timerInterval = null;
 function updateCharacterCount() {
     const charCount = textBox.value.length;
     charCountDisplay.textContent = charCount;
-    const totalMinutes = charCount / 1200;
+    const totalMinutes = charCount / 1000;
     const minutes = Math.floor(totalMinutes);
     const remainderSeconds = Math.floor((totalMinutes - minutes) * 60);
     timeEstimateDisplay.textContent = `${minutes}m ${remainderSeconds}s`;
