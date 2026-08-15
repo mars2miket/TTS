@@ -27,7 +27,12 @@ const SEEK_WORD_COUNT = 5;      // how many words Rewind/Fast Forward jump per p
 // Many mobile TTS engines (notably Android Chrome) silently fail once a single
 // utterance passes roughly 4000 characters. To stay safe across devices, any text
 // being read is split into smaller pieces and played back-to-back as a queue.
-const CHUNK_CHAR_LIMIT = 3000;
+// Kept intentionally small (well under the ~4000-char mobile safety limit).
+// Mobile browsers (notably Android Chrome) often don't fire onboundary word
+// events reliably, so lastCharacterIndex can't always be tracked word-by-word
+// on those devices. Smaller chunks give a fallback "resume point" at roughly
+// sentence granularity instead of restarting from the very beginning.
+const CHUNK_CHAR_LIMIT = 250;
 let speechChunks = [];
 let currentChunkIndex = 0;
 let chunkBaseIndex = 0;          // absolute offset (in the full textbox value) where speechChunks[0] begins
@@ -304,6 +309,13 @@ function speakText(textOverride = null, isMidSentenceResume = false) {
 function playCurrentChunk() {
     const chunkText = speechChunks[currentChunkIndex];
     const thisChunkBaseIndex = chunkBaseIndex;
+
+    // Fallback resume point: set immediately, before playback even starts.
+    // If onboundary fires during playback (desktop, most of the time) it will
+    // overwrite this with more precise word-level positions. If it doesn't
+    // fire (common on mobile), this chunk-start position is what pause/resume
+    // falls back to — far better than restarting from the very beginning.
+    lastCharacterIndex = thisChunkBaseIndex;
 
     currentUtterance = new SpeechSynthesisUtterance(chunkText);
     const selectedVoiceIndex = voiceSelect.value;
