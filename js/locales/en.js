@@ -41,4 +41,22 @@ window.__LOCALES__.en = {
     confirmMessage: "Are you sure?",
     cancel: "Cancel",
     confirm: "Confirm",
+
+    // Spreadsheet Headers
+    startTest: "Start Test",
+    showColumn: "Show Column",
+
+    // Exam
+    examMultiChoice: "Multi Choice",
+    examTF: "T / F",
+    examFillBlank: "Fill-in-Blank",
+    examPrompt: "Exam Prompt",
+    examCheck: "Check Answer",
+    examNext: "Next",
+    examYourAnswer: "Your Answer",
+    examProposedAnswer: "Proposed Answer",
+    examTrue: "True",
+    examFalse: "False",
+    examCorrect: "✅ Correct! Great job.",
+    examIncorrect: "❌ Incorrect. Expected:",
 };

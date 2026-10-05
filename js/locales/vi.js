@@ -43,4 +43,22 @@ window.__LOCALES__.vi = {
     confirmMessage: "Bạn có chắc không?",
     cancel: "Hủy",
     confirm: "Xác nhận",
+
+    // Spreadsheet Headers
+    startTest: "Bắt đầu bài kiểm tra",
+    showColumn: "Hiện cột",
+
+    // Exam
+    examMultiChoice: "Trắc nghiệm",
+    examTF: "Đúng / Sai",
+    examFillBlank: "Điền vào chỗ trống",
+    examPrompt: "Đề bài",
+    examCheck: "Kiểm tra",
+    examNext: "Tiếp",
+    examYourAnswer: "Câu trả lời của bạn",
+    examProposedAnswer: "Đáp án đề xuất",
+    examTrue: "Đúng",
+    examFalse: "Sai",
+    examCorrect: "✅ Chính xác!",
+    examIncorrect: "❌ Sai. Đáp án đúng:",
 };

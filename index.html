@@ -9,15 +9,16 @@
         (function () {
             try {
                 var t = localStorage.getItem('recallrx-theme');
-                if (t === 'dark' || t === 'light') {
-                    document.documentElement.setAttribute('data-theme', t);
-                }
+                document.documentElement.setAttribute('data-theme', (t === 'light' || t === 'dark') ? t : 'dark');
+
                 var l = localStorage.getItem('recallrx-lang');
                 if (l) {
                     document.documentElement.setAttribute('lang', l);
                     document.documentElement.setAttribute('data-lang', l);
                 }
-            } catch (e) { }
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
         })();
     </script>
     <link rel="stylesheet" href="styles/base.css">
@@ -101,9 +102,10 @@
                                         <button id="list-import-btn" class="ctrl-btn" data-i18n-title="importList"
                                             title="Import list">Imp ⬆️</button>
                                     </div>
-                                    <button id="add-row-btn" class="ctrl-btn" data-i18n="addRow">+ Add Row</button>
-                                    <button id="clear-btn" class="ctrl-btn danger" data-i18n="clearContent">Clear
-                                        Content</button>
+                                    <div class="ctrl-row">
+                                        <button id="add-row-btn" class="ctrl-btn half" data-i18n="addRow">+ Add Row</button>
+                                        <button id="clear-btn" class="ctrl-btn half danger" data-i18n="clearContent">Clear Content</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -231,14 +233,14 @@
                     <div id="spreadsheet-container" class="spreadsheet-grid">
                         <div class="cell header-cell" data-col="A">
                             <div class="header-split-wrapper">
-                                <span class="header-label" data-col="A"></span>
+                                <span class="header-label" data-col="A"><span class="header-prefix prefix-start" data-i18n="startTest">Start Test</span><span class="header-prefix prefix-show" data-i18n="showColumn">Show Column</span></span>
                                 <button class="header-sort-btn" title="Sort A-Z / Z-A">⇅</button>
                             </div>
                             <div class="resizer"></div>
                         </div>
                         <div class="cell header-cell" data-col="B">
                             <div class="header-split-wrapper">
-                                <span class="header-label" data-col="B"></span>
+                                <span class="header-label" data-col="B"><span class="header-prefix prefix-start" data-i18n="startTest">Start Test</span><span class="header-prefix prefix-show" data-i18n="showColumn">Show Column</span></span>
                                 <button class="header-sort-btn" title="Sort A-Z / Z-A">⇅</button>
                             </div>
                         </div>

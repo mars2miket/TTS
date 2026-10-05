@@ -1,4 +1,4 @@
-// --- SIMPLE i18n ENGINE js/i18n.js---
+// --- SIMPLE i18n ENGINE ---
 // Reads locales from window.__LOCALES__ (populated by js/locales/*.js).
 // Toggle button cycles through all available locales.
 (function initI18n() {
@@ -10,7 +10,6 @@
     const codes = Object.keys(locales);
     if (codes.length === 0) return;
 
-    // Short display codes for the toggle button
     const SHORT = { en: 'EN', vi: 'VI' };
 
     let current = (() => {
@@ -29,25 +28,21 @@
 
         const dict = locales[lang] || {};
 
-        // Text content
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             if (dict[key] != null) el.textContent = dict[key];
         });
 
-        // Title attribute
         document.querySelectorAll('[data-i18n-title]').forEach(el => {
             const key = el.getAttribute('data-i18n-title');
             if (dict[key] != null) el.setAttribute('title', dict[key]);
         });
 
-        // Aria-label attribute
         document.querySelectorAll('[data-i18n-aria]').forEach(el => {
             const key = el.getAttribute('data-i18n-aria');
             if (dict[key] != null) el.setAttribute('aria-label', dict[key]);
         });
 
-        // Placeholder attribute
         document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
             const key = el.getAttribute('data-i18n-placeholder');
             if (dict[key] != null) el.setAttribute('placeholder', dict[key]);
@@ -56,12 +51,17 @@
         if (label) label.textContent = SHORT[lang] || lang.toUpperCase();
 
         try { localStorage.setItem('recallrx-lang', lang); } catch (e) {}
+
+        // Re-render the exam module in the new language
+        if (typeof window.refreshExamLanguage === 'function') {
+            try { window.refreshExamLanguage(); } catch (e) {}
+        } else if (typeof window.renderShell === 'function') {
+            try { window.renderShell(); } catch (e) {}
+        }
     }
 
-    // Apply initial language immediately
     apply(current);
 
-    // Cycle on click
     if (btn) {
         btn.addEventListener('click', () => {
             const idx = codes.indexOf(current);
@@ -70,6 +70,12 @@
         });
     }
 
-    // Expose for programmatic use / future extension
-    window.__i18n__ = { apply, get: () => current, codes };
+    window.__i18n__ = {
+        apply,
+        get: () => current,
+        codes,
+        t: (key) => (locales[current] && locales[current][key])
+                 || (locales[codes[0]] && locales[codes[0]][key])
+                 || key
+    };
 })();

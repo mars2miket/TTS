@@ -1,4 +1,6 @@
-
+.header-cell .header-label .prefix-show { display: none; }
+.header-cell.col-hidden-active .header-label .prefix-start { display: none; }
+.header-cell.col-hidden-active .header-label .prefix-show { display: inline; }
 
 /* ==========================================================================
    SIDEBAR WRAPPER + LAYOUT
@@ -334,13 +336,7 @@
     text-align: left;
 }
 
-.header-cell .header-label::before {
-    content: "Start Test ";
-}
 
-.header-cell.col-hidden-active .header-label::before {
-    content: "Show Column ";
-}
 
 .header-cell .header-sort-btn {
     background-color: #575366;
