@@ -397,18 +397,7 @@ function buildTFQuestion(item, body, feedback) {
 function buildSelectQuestion(item, body, feedback, checkBtn) { ... }
 */
 
-// --- SIDEBAR RESET ON WINDOW RESIZE ---
-window.addEventListener('resize', () => {
-    const wrapper = document.getElementById('sidebar-wrapper');
-    if (!wrapper) return;
-    if (window.innerWidth > 700) {
-        wrapper.classList.add('open');
-        wrapper.classList.remove('collapsed');
-    } else {
-        wrapper.classList.remove('open');
-        wrapper.classList.add('collapsed');
-    }
-});
+
 
 (function initExamShell() {
     if (document.readyState === 'loading') {
