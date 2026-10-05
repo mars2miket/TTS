@@ -51,7 +51,7 @@ window.__LOCALES__.vi = {
     // Exam
     examMultiChoice: "Trắc nghiệm",
     examTF: "Đúng / Sai",
-    examFillBlank: "Điền vào chỗ trống",
+    examFillBlank: "Điền chỗ trống",
     examPrompt: "Đề bài",
     examCheck: "Kiểm tra",
     examNext: "Tiếp",
