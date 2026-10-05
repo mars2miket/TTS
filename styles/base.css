@@ -51,6 +51,10 @@ body {
     transition: background-color .5s ease, color .5s ease;
 }
 
+#lang-toggle { margin-left: auto !important; }
+#m-menu-btn svg { stroke: currentColor !important; }
+#m-menu-btn svg { stroke: #5e5ce8 !important; }
+
 textarea {
     pointer-events: none;
 }
@@ -119,6 +123,7 @@ textarea {
     font-size: 20px;
     font-weight: 700;
     color: var(--text-primary);
+    flex: 1; 
 }
 
 /* ==========================================================================
