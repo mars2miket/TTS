@@ -1,0 +1,179 @@
+/* ==========================================================================
+   THEME VARIABLES
+   ========================================================================== */
+:root {
+    --bg-app: #f1f5f9;
+    --bg-surface: #ffffff;
+    --bg-surface-2: #f8fafc;
+    --bg-elevated: #ffffff;
+    --text-primary: #403D4A;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --scrollbar-track: #f1f5f9;
+    --scrollbar-thumb: #cbd5e1;
+    --scrollbar-thumb-hover: #94a3b8;
+    --control-bg: #ffffff;
+    --control-border: #cbd5e1;
+
+    /* Accent palette — variant B: teal base + purple highlight */
+    --accent-light: #7c5ce8;
+    --accent-mid: #2f5c9c;
+    --accent-deep: #0b4f5c;
+    --accent-soft: rgba(47, 92, 156, 0.10);
+    --accent-glow: rgba(47, 92, 156, 0.28);
+}
+
+[data-theme="dark"] {
+    --bg-app: #0f172a;
+    --bg-surface: #1e293b;
+    --bg-surface-2: #172033;
+    --bg-elevated: #334155;
+    --text-primary: #e2e8f0;
+    --text-muted: #94a3b8;
+    --border-color: #334155;
+    --border-strong: #475569;
+    --scrollbar-track: #1e293b;
+    --scrollbar-thumb: #475569;
+    --scrollbar-thumb-hover: #64748b;
+    --control-bg: #1e293b;
+    --control-border: #475569;
+}
+
+/* ==========================================================================
+   GLOBAL RESET
+   ========================================================================== */
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    transition: background-color .5s ease, color .5s ease;
+}
+
+textarea {
+    pointer-events: none;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ==========================================================================
+   SCROLLBARS
+   ========================================================================== */
+.controls-sidebar::-webkit-scrollbar-track,
+.spreadsheet-grid::-webkit-scrollbar-track,
+#recall-viewer::-webkit-scrollbar-track,
+.sidebar-scrollable-content::-webkit-scrollbar-track {
+    background: var(--scrollbar-track) !important;
+}
+.controls-sidebar::-webkit-scrollbar-thumb,
+.spreadsheet-grid::-webkit-scrollbar-thumb,
+#recall-viewer::-webkit-scrollbar-thumb,
+.sidebar-scrollable-content::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb) !important;
+    border-radius: 6px !important;
+    border: 2px solid var(--bg-surface) !important;
+    transition: background-color .5s ease;
+}
+.controls-sidebar::-webkit-scrollbar-thumb:hover,
+.spreadsheet-grid::-webkit-scrollbar-thumb:hover,
+#recall-viewer::-webkit-scrollbar-thumb:hover,
+.sidebar-scrollable-content::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover) !important;
+}
+
+/* ==========================================================================
+   APP SHELL
+   ========================================================================== */
+.app-shell {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+    height: var(--app-height, 100vh);
+    overflow: hidden;
+}
+
+/* ==========================================================================
+   TOP STICKY BAR
+   ========================================================================== */
+.top-sticky-bar {
+    display: flex;
+    align-items: center;
+    height: 56px;
+    width: 100%;
+    flex-shrink: 0;
+    padding: 0 20px;
+    background-color: var(--bg-surface-2);
+    border-bottom: 1px solid var(--border-color);
+    box-sizing: border-box;
+    transition: background-color .5s ease, border-color .5s ease;
+}
+
+.top-sticky-bar .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* ==========================================================================
+   MASTER LAYOUT
+   ========================================================================== */
+.app-layout-container {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    position: relative;
+}
+
+.input-workspace {
+    flex-grow: 1;
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* ==========================================================================
+   THEME TOGGLE
+   ========================================================================== */
+.theme-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid var(--control-border);
+    border-radius: 6px;
+    background: var(--control-bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color .5s ease,
+                color .5s ease,
+                border-color .5s ease,
+                transform .15s ease;
+}
+.theme-toggle-btn:hover { transform: scale(1.08); }
+.theme-toggle-btn:active { transform: scale(.95); }
+.theme-toggle-btn:focus-visible {
+    outline: 2px solid #60a5fa;
+    outline-offset: 2px;
+}
+
+.theme-toggle-btn .icon-sun  { display: none; }
+.theme-toggle-btn .icon-moon { display: block; }
+[data-theme="dark"] .theme-toggle-btn .icon-sun  { display: block; }
+[data-theme="dark"] .theme-toggle-btn .icon-moon { display: none; }
