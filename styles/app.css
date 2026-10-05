@@ -839,13 +839,17 @@
 
     .input-workspace {
         padding: 12px;
-        padding-bottom: 150px;
+        padding-bottom: calc(56px + env(safe-area-inset-bottom, 0));
     }
 
     .spreadsheet-grid { max-height: 35vh; flex-shrink: 0; }
 
     #note-area { width: 100%; min-width: 0; }
-    #recall-viewer { max-height: 60vh; }
+    #recall-viewer {
+        flex: 1 1 auto;
+        min-height: 0;
+        max-height: none;
+    }
 
     /* Mobile playback bar */
     .mobile-playback-bar {
