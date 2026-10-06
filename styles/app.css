@@ -848,7 +848,22 @@
         padding-bottom: calc(56px + env(safe-area-inset-bottom, 0));
     }
 
-    .spreadsheet-grid { max-height: 35vh; flex-shrink: 0; }
+        .input-workspace {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+    }
+
+    .spreadsheet-grid {
+        flex: 1 1 auto;
+        max-height: none;
+        min-height: 0;
+    }
+
+    .grid-footer {
+        margin-top: auto;
+    }
 
     #note-area { width: 100%; min-width: 0; }
     #recall-viewer {
