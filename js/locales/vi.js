@@ -51,7 +51,7 @@ window.__LOCALES__.vi = {
 
     // Onboarding
     onboardingTitle: "Chào mừng",
-    onboardingBody: "Dán danh sách hai cột hoặc tệp văn bản trực tiếp vào bảng bên dưới — hoặc dùng dữ liệu mẫu để xem cách hoạt động.",
+    onboardingBody: "Nhập hoặc dán dữ liệu vào cả hai cột, sau đó nhấp vào nút Ẩn trên một trong hai cột để kiểm tra trí nhớ của bạn.",
     onboardingSampleBadge: "Mẫu",
     onboardingDismiss: "Đóng",
 
@@ -79,5 +79,9 @@ window.__LOCALES__.vi = {
     gridCaption: "Nhập/dán dữ liệu vào các cột, sau đó ẩn một cột để kiểm tra trí nhớ.",
     examBackBtn: "← Quay lại",
     examListLabel: "Danh sách",
+    examQuestionLabel: "Câu",
+    examTallyCorrect: "đúng",
+    examTallyAnswered: "đã trả lời",
+    examComplete: "Hoàn thành bài kiểm tra.",
 
 };

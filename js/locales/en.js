@@ -49,7 +49,7 @@ window.__LOCALES__.en = {
 
     // Onboarding
     onboardingTitle: "Welcome",
-    onboardingBody: "Paste a two-column list or a text file directly into the grid below — or load the sample data to see how it works.",
+    onboardingBody: "Type or paste data into both columns, then click Hide on either column to test your memory.",
     onboardingSampleBadge: "Sample",
     onboardingDismiss: "Dismiss",
 
@@ -74,7 +74,11 @@ window.__LOCALES__.en = {
     examIncorrect: "❌ Incorrect. Expected:",
     startTestHelper: "When you're ready, test your memory.",
     startTestBtn: "Start Test",
-    gridCaption: "Type/paste data into columns, then hide one of the columns to test your memory.",
+    //gridCaption: "Type/paste data into columns, then hide one of the columns to test your memory.",
     examBackBtn: "← Back",
     examListLabel: "List",
+    examQuestionLabel: "Question",
+    examTallyCorrect: "correct",
+    examTallyAnswered: "answered",
+    examComplete: "Test complete.",
 };

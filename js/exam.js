@@ -7,6 +7,9 @@ let examDeck = [];
 let lastExamItem = null;
 let examSignature = '';
 let currentItem = null;
+let examCounter = 0;
+let examCorrectCount = 0;
+let examAnsweredCount = 0;
 
 function t(key) {
     return (window.__i18n__ && window.__i18n__.t) ? window.__i18n__.t(key) : key;
@@ -198,6 +201,9 @@ function renderShell() {
     const feedback = wrapper.querySelector('#exam-feedback');
     if (feedback) feedback.textContent = '';
 
+    const counterEl = document.getElementById('exam-counter');
+    if (counterEl) counterEl.textContent = '';
+
     isQuestionActive = false;
     currentItem = null;
 }
@@ -214,6 +220,9 @@ function resetExam() {
 
 function generateMockTest() {
     activeExamRows = [];
+    examCounter = 0;
+    examCorrectCount = 0;
+    examAnsweredCount = 0;
     spreadsheetContainer.querySelectorAll('.data-cell[data-col="A"]').forEach(cellA => {
         const rowNum = cellA.dataset.row;
         const cellB = spreadsheetContainer.querySelector(`.data-cell[data-row="${rowNum}"][data-col="B"]`);
@@ -238,7 +247,7 @@ function generateMockTest() {
     const newSignature = JSON.stringify(activeExamRows);
     if (newSignature !== examSignature) {
         examSignature = newSignature;
-        examDeck = [];
+        examDeck = shuffle(activeExamRows);
     }
 
     const item = drawNextItem();
@@ -247,18 +256,18 @@ function generateMockTest() {
 
 function drawNextItem() {
     if (examDeck.length === 0) {
-        examDeck = shuffle(activeExamRows);
-        const top = examDeck[examDeck.length - 1];
-        if (examDeck.length > 1 && lastExamItem &&
-            top.prompt === lastExamItem.prompt && top.answer === lastExamItem.answer) {
-            [examDeck[0], examDeck[examDeck.length - 1]] = [examDeck[examDeck.length - 1], examDeck[0]];
-        }
+        return null;
     }
     lastExamItem = examDeck.pop();
     return lastExamItem;
 }
 
 function showFeedback(el, correct, expected) {
+    examAnsweredCount++;
+    if (correct) examCorrectCount++;
+    const counterEl = document.getElementById('exam-counter');
+    if (counterEl) counterEl.textContent = `${t('examQuestionLabel')} ${examCounter} · ${examCorrectCount} ${t('examTallyCorrect')} / ${examAnsweredCount} ${t('examTallyAnswered')}`;
+
     if (correct) {
         el.textContent = t('examCorrect');
         el.style.color = "green";
@@ -268,7 +277,38 @@ function showFeedback(el, correct, expected) {
     }
 }
 
+function drawCompleteState() {
+    const wrapper = getShell();
+    if (!wrapper) return;
+
+    const promptText = wrapper.querySelector('#exam-prompt-text');
+    if (promptText) promptText.textContent = '';
+
+    const body = wrapper.querySelector('#exam-body');
+    if (body) {
+        body.className = 'exam-body';
+        body.innerHTML = `<p style="text-align:center;font-size:18px;font-weight:700;">${t('examComplete')}</p>
+            <p style="text-align:center;font-size:15px;">${examCorrectCount} ${t('examTallyCorrect')} / ${examAnsweredCount} ${t('examTallyAnswered')}</p>`;
+    }
+
+    const feedback = wrapper.querySelector('#exam-feedback');
+    if (feedback) feedback.textContent = '';
+
+    const checkBtn = wrapper.querySelector('#exam-submit-btn');
+    if (checkBtn) checkBtn.disabled = true;
+
+    const nextBtn = wrapper.querySelector('#exam-next-btn');
+    if (nextBtn) nextBtn.disabled = true;
+
+    isQuestionActive = false;
+}
+
 function drawActiveQuestion(item) {
+    const isNewItem = (currentItem !== item);
+    if (isNewItem) examCounter++;
+    const counterEl = document.getElementById('exam-counter');
+    if (counterEl) counterEl.textContent = `${t('examQuestionLabel')} ${examCounter} · ${examCorrectCount} ${t('examTallyCorrect')} / ${examAnsweredCount} ${t('examTallyAnswered')}`;
+
     currentItem = item;
     isQuestionActive = true;
 
@@ -313,9 +353,14 @@ function drawActiveQuestion(item) {
             return;
         }
         const next = drawNextItem();
+        if (next === null) {
+            drawCompleteState();
+            return;
+        }
         drawActiveQuestion(next);
     });
 }
+
 
 function buildTypeQuestion(item, body, feedback, checkBtn) {
     body.innerHTML = `
@@ -462,6 +507,8 @@ window.renderShell = renderShell;
         grid.classList.add('exam-hidden');
         if (caption) caption.classList.add('exam-hidden');
         if (footer) footer.classList.add('exam-hidden');
+        const hint = document.getElementById('onboarding-hint');
+        if (hint) hint.classList.add('exam-hidden');
 
         recallViewer.classList.add('exam-active');
         try { localStorage.setItem('whMode', 'exam'); } catch (e) {}
@@ -480,6 +527,11 @@ window.exitExamView = function () {
     grid.classList.remove('exam-hidden');
     if (caption) caption.classList.remove('exam-hidden');
     if (footer) footer.classList.remove('exam-hidden');
+
+    const hint = document.getElementById('onboarding-hint');
+    if (hint && !localStorage.getItem('recallrx-hint-dismissed')) {
+        hint.classList.remove('exam-hidden');
+    }
 
     recallViewer.classList.remove('exam-active');
     try { localStorage.setItem('whMode', 'grid'); } catch (e) {}

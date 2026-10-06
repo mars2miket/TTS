@@ -239,8 +239,7 @@
                         <p data-i18n="onboardingBody">Paste a two-column list or a text file directly into the grid
                             below — or type</p>
                     </div>
-                    <div class="grid-caption" data-i18n="gridCaption">Type/paste data into columns, then hide one of the
-                        columns to test your memory.</div>
+
                     <div id="spreadsheet-container" class="spreadsheet-grid">
                         <div class="cell header-cell" data-col="A">
                             <div class="header-split-wrapper">
@@ -262,8 +261,11 @@
                         <button id="start-test-btn" class="start-test-btn" type="button" data-i18n="startTestBtn"
                             disabled>Start Test</button>
                     </div>
-
+                        <div class="exam-counter-strip">
+                            <span id="exam-counter" class="exam-counter"></span>
+                        </div>
                     <div id="recall-viewer">
+
                         <div class="exam-topbar">
                             <div class="exam-list-group">
                                 <label class="exam-list-label" for="exam-list-picker" data-i18n="examListLabel">Lists</label>
@@ -272,6 +274,7 @@
                             <button id="exam-back-btn" class="exam-back-btn" type="button" data-i18n="examBackBtn">← Back</button>
                         </div>
                     </div>
+
                     <textarea id="note-area" placeholder="Type or paste your note..." spellcheck="false"></textarea>
                     <div id="note-resizer"></div>
                 </main>

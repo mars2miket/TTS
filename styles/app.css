@@ -475,8 +475,13 @@
 }
 
 .recall-word.col-hidden:not(.revealed) {
-    background-color: #1e293b;
-    color: #1e293b;
+    background-color: #1e293b !important;
+    color: #1e293b !important;
+}
+
+[data-theme="light"] .recall-word.col-hidden:not(.revealed) {
+    background-color: #0f172a !important;
+    color: #0f172a !important;
 }
 
 .recall-word.revealed {
@@ -966,7 +971,7 @@
 
 .hint-card p {
     margin: 0;
-    font-size: 13px;
+    font-size: 16px;
     color: var(--text-primary);
     line-height: 1.45;
     padding-right: 20px;
@@ -1045,7 +1050,8 @@
 
 #spreadsheet-container.exam-hidden,
 .grid-caption.exam-hidden,
-.grid-footer.exam-hidden {
+.grid-footer.exam-hidden,
+.hint-card.exam-hidden {
     display: none;
 }
 
@@ -1132,4 +1138,26 @@
 
 .exam-topbar {
     align-items: flex-end;
+}
+
+.exam-counter {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    padding: 0 4px;
+    white-space: nowrap;
+}
+
+.exam-counter-strip {
+    padding: 8px 10px 0 10px;
+    display: flex;
+    justify-content: center;
+}
+
+.exam-counter {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
 }
