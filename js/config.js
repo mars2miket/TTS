@@ -67,3 +67,20 @@ window.femaleKeywords = [
     'natasha', 'nia', 'ramona', 'rosa', 'salome', 'samantha', 'seraphina',
     'sofia', 'sonia', 'tessa', 'vesna', 'victoria', 'vlasta', 'yan', 'zira'
 ];
+
+const SAMPLE_DATA = {
+    en: [
+        ["hello", "xin chào"],
+        ["thank you", "cảm ơn"],
+        ["goodbye", "tạm biệt"],
+        ["student", "học sinh"],
+        ["teacher", "giáo viên"],
+    ],
+    vi: [
+        ["xin chào", "hello"],
+        ["cảm ơn", "thank you"],
+        ["tạm biệt", "goodbye"],
+        ["học sinh", "student"],
+        ["giáo viên", "teacher"],
+    ],
+};

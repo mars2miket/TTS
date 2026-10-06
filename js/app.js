@@ -104,3 +104,54 @@ if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', lockMobileViewport);
     window.visualViewport.addEventListener('scroll', lockMobileViewport);
 }
+
+// --- FIRST-RUN ONBOARDING SEED aka sample data---
+(function initOnboardingSeed() {
+    try {
+        if (localStorage.getItem('recallrx-onboarded')) return;
+
+        const existing = localStorage.getItem('savedSpreadsheetGridData');
+        if (existing) return;
+
+        const lang = document.documentElement.getAttribute('data-lang') || 'en';
+        const rows = (window.SAMPLE_DATA && window.SAMPLE_DATA[lang]) || (window.SAMPLE_DATA && window.SAMPLE_DATA.en);
+        if (!rows) return;
+
+        localStorage.setItem('savedSpreadsheetGridData', JSON.stringify(rows));
+        localStorage.setItem('recallrx-onboarded', '1');
+    } catch (e) {}
+})();
+
+// --- ONBOARDING HINT DISMISS ---
+(function initOnboardingHint() {
+    const hint = document.getElementById('onboarding-hint');
+    const btn = document.getElementById('onboarding-dismiss');
+    if (!hint || !btn) return;
+
+    if (localStorage.getItem('recallrx-hint-dismissed')) {
+        hint.remove();
+        return;
+    }
+
+    btn.addEventListener('click', () => {
+        hint.remove();
+        try { localStorage.setItem('recallrx-hint-dismissed', '1'); } catch (e) {}
+    });
+})();
+
+// --- ONBOARDING HINT DISMISS ---
+(function initOnboardingHint() {
+    const hint = document.getElementById('onboarding-hint');
+    const btn = document.getElementById('onboarding-dismiss');
+    if (!hint || !btn) return;
+
+    if (localStorage.getItem('recallrx-hint-dismissed')) {
+        hint.remove();
+        return;
+    }
+
+    btn.addEventListener('click', () => {
+        hint.remove();
+        try { localStorage.setItem('recallrx-hint-dismissed', '1'); } catch (e) {}
+    });
+})();

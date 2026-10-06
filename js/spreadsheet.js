@@ -61,6 +61,15 @@ spreadsheetContainer.addEventListener('input', (e) => {
         }
         window.isTextDirty = true;
         updateCharacterCount();
+                // auto-append a new empty row when typing in the last row
+        const rowNum = parseInt(e.target.dataset.row, 10);
+        let maxRow = 0;
+        spreadsheetContainer.querySelectorAll('.data-cell[data-col="A"]').forEach(c => {
+            maxRow = Math.max(maxRow, parseInt(c.dataset.row, 10) || 0);
+        });
+        if (rowNum === maxRow) {
+            createRowCells(maxRow + 1, '', '');
+        }
         try {
             localStorage.setItem('savedSpreadsheetGridData', textBox.value);
         } catch (err) {
@@ -199,33 +208,6 @@ spreadsheetContainer.addEventListener('paste', (e) => {
     });
 })();
 
-// --- ROW AREA (HEIGHT) RESIZE ---
-(function setupRowResize() {
-    const handle = document.querySelector('.row-resizer');
-    if (!handle) return;
-    handle.addEventListener('pointerdown', (e) => {
-        e.preventDefault();
-        handle.setPointerCapture(e.pointerId);
-        const startY = e.clientY;
-        const startHeight = spreadsheetContainer.getBoundingClientRect().height;
-        handle.classList.add('resizing');
-
-        function onPointerMove(e2) {
-            const delta = e2.clientY - startY;
-            const newHeight = Math.max(80, startHeight + delta);
-            spreadsheetContainer.style.maxHeight = 'none';
-            spreadsheetContainer.style.height = `${newHeight}px`;
-        }
-        function onPointerUp(e2) {
-            handle.classList.remove('resizing');
-            handle.releasePointerCapture(e2.pointerId);
-            handle.removeEventListener('pointermove', onPointerMove);
-            handle.removeEventListener('pointerup', onPointerUp);
-        }
-        handle.addEventListener('pointermove', onPointerMove);
-        handle.addEventListener('pointerup', onPointerUp);
-    });
-})();
 
 // --- IN-CELL WORD MASKING ---
 function maskCell(cell) {
@@ -268,20 +250,19 @@ spreadsheetContainer.addEventListener('focusout', (e) => {
 
 // --- PER-COLUMN HIDE TOGGLE INTERCEPT BRIDGE ---
 function toggleColumnHide(letter) {
-    if (typeof generateMockTest === 'function') {
-        generateMockTest();
-    }
-
     colHiddenState[letter] = !colHiddenState[letter];
     const headerEl = spreadsheetContainer.querySelector(`.header-cell[data-col="${letter}"]`);
-    if (headerEl) headerEl.classList.toggle('col-hidden-active', colHiddenState[letter]);
-
-    applyCellMaskForColumn(letter);
-
-    if (recallViewer.classList.contains('hidden')) {
-        recallViewer.style.height = '50vh';
-        recallViewer.classList.remove('hidden');
+    if (headerEl) {
+        headerEl.classList.toggle('col-hidden-active', colHiddenState[letter]);
+        const label = headerEl.querySelector('.header-label');
+        if (label) {
+            label.dataset.i18n = colHiddenState[letter] ? `showCol${letter}` : `hideCol${letter}`;
+            if (window.__i18n__ && typeof window.__i18n__.t === 'function') {
+                label.textContent = window.__i18n__.t(label.dataset.i18n);
+            }
+        }
     }
+    applyCellMaskForColumn(letter);
 }
 
 spreadsheetContainer.querySelectorAll('.header-cell').forEach(headerEl => {
@@ -546,3 +527,26 @@ if (addRowBtn) addRowBtn.addEventListener('click', () => {
         newCell.focus();
     }
 });
+
+// --- START TEST BUTTON STATE ---
+(function initStartTestButton() {
+    const btn = document.getElementById('start-test-btn');
+    if (!btn) return;
+
+    function syncState() {
+        const cells = spreadsheetContainer.querySelectorAll('.data-cell');
+        let hasContent = false;
+        cells.forEach(c => {
+            if (c.textContent.trim() !== '') hasContent = true;
+        });
+        btn.disabled = !hasContent;
+    }
+
+    window.syncStartTestButton = syncState;
+
+    spreadsheetContainer.addEventListener('input', syncState);
+    spreadsheetContainer.addEventListener('paste', () => setTimeout(syncState, 0));
+    spreadsheetContainer.addEventListener('focusout', () => setTimeout(syncState, 0));
+
+    syncState();
+})();

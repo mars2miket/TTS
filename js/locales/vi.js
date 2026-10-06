@@ -48,6 +48,19 @@ window.__LOCALES__.vi = {
     startTest: "Bắt đầu bài kiểm tra",
     showColumn: "Hiện cột",
 
+
+    // Onboarding
+    onboardingTitle: "Chào mừng",
+    onboardingBody: "Dán danh sách hai cột hoặc tệp văn bản trực tiếp vào bảng bên dưới — hoặc dùng dữ liệu mẫu để xem cách hoạt động.",
+    onboardingSampleBadge: "Mẫu",
+    onboardingDismiss: "Đóng",
+
+    // Grid Columns
+    hideColA: "Ẩn cột A",
+    hideColB: "Ẩn cột B",
+    showColA: "Hiện cột A",
+    showColB: "Hiện cột B",
+
     // Exam
     examMultiChoice: "Trắc nghiệm",
     examTF: "Đúng / Sai",
@@ -61,4 +74,10 @@ window.__LOCALES__.vi = {
     examFalse: "Sai",
     examCorrect: "✅ Chính xác!",
     examIncorrect: "❌ Sai. Đáp án đúng:",
+    startTestHelper: "Khi bạn đã sẵn sàng, hãy kiểm tra trí nhớ.",
+    startTestBtn: "Bắt đầu kiểm tra",
+    gridCaption: "Nhập/dán dữ liệu vào các cột, sau đó ẩn một cột để kiểm tra trí nhớ.",
+    examBackBtn: "← Quay lại",
+    examListLabel: "Danh sách",
+
 };

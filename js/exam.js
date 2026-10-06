@@ -417,3 +417,91 @@ window.refreshExamLanguage = function () {
     }
 };
 window.renderShell = renderShell;
+
+// --- EXAM TOPBAR WIRING ---
+(function initExamTopbar() {
+    const picker = document.getElementById('exam-list-picker');
+    const backBtn = document.getElementById('exam-back-btn');
+    if (!picker || !backBtn) return;
+
+    backBtn.addEventListener('click', () => window.exitExamView());
+
+    picker.addEventListener('change', () => {
+        const name = picker.value;
+        if (typeof window.switchList === 'function') {
+            window.switchList(name);
+            // restart the exam with the new list
+            if (typeof generateMockTest === 'function') generateMockTest();
+        }
+    });
+
+    window.refreshExamPicker = function () {
+        const store = window.listStore || {};
+        const active = localStorage.getItem('whActiveList');
+        picker.innerHTML = '';
+        Object.keys(store).forEach(name => {
+            const op = document.createElement('option');
+            op.value = name;
+            op.textContent = name;
+            picker.appendChild(op);
+        });
+        if (active) picker.value = active;
+    };
+})();
+
+// --- START TEST ENTRY / EXIT ---
+(function initStartTestEntry() {
+    const btn = document.getElementById('start-test-btn');
+    if (!btn) return;
+
+    btn.addEventListener('click', () => {
+        const grid = document.getElementById('spreadsheet-container');
+        const caption = document.querySelector('.grid-caption');
+        const footer = document.querySelector('.grid-footer');
+
+        grid.classList.add('exam-hidden');
+        if (caption) caption.classList.add('exam-hidden');
+        if (footer) footer.classList.add('exam-hidden');
+
+        recallViewer.classList.add('exam-active');
+        try { localStorage.setItem('whMode', 'exam'); } catch (e) {}
+        if (typeof window.refreshExamPicker === 'function') window.refreshExamPicker();
+
+        generateMockTest();
+    });
+})();
+
+// --- EXIT EXAM (return to grid) ---
+window.exitExamView = function () {
+    const grid = document.getElementById('spreadsheet-container');
+    const caption = document.querySelector('.grid-caption');
+    const footer = document.querySelector('.grid-footer');
+
+    grid.classList.remove('exam-hidden');
+    if (caption) caption.classList.remove('exam-hidden');
+    if (footer) footer.classList.remove('exam-hidden');
+
+    recallViewer.classList.remove('exam-active');
+    try { localStorage.setItem('whMode', 'grid'); } catch (e) {}
+};
+
+// --- RESTORE EXAM VIEW ON REFRESH ---
+(function restoreExamMode() {
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            try {
+                if (localStorage.getItem('whMode') === 'exam') {
+                    const grid = document.getElementById('spreadsheet-container');
+                    const caption = document.querySelector('.grid-caption');
+                    const footer = document.querySelector('.grid-footer');
+                    if (grid) grid.classList.add('exam-hidden');
+                    if (caption) caption.classList.add('exam-hidden');
+                    if (footer) footer.classList.add('exam-hidden');
+                    recallViewer.classList.add('exam-active');
+                    if (typeof window.refreshExamPicker === 'function') window.refreshExamPicker();
+                    generateMockTest();
+                }
+            } catch (e) {}
+        }, 100);
+    });
+})();
