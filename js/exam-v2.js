@@ -454,6 +454,10 @@
 
     var title = document.createElement('h3');
     title.textContent = t('examComplete');
+    var subtitle = document.createElement('p');
+    subtitle.className = 'exam-complete-subtitle';
+    subtitle.textContent = t('examCompleteHint');
+    card.appendChild(subtitle);
     card.appendChild(title);
 
     var score = document.createElement('p');
@@ -496,7 +500,7 @@
     var existing = notes['Test Results'] || '';
 
     var date = formatDate(new Date());
-    var line = date + ', ' + result.listName + ' — ' + result.correct + '/' + result.answered;
+    var line = date + ', ' + result.listName + ' — ' + result.correct + ' ' + t('examScoreOutOf') + ' ' + result.answered + ' ' + t('examTallyCorrect') + '.';
     var body = line + '\n';
 
     if (result.missed && result.missed.length > 0) {
