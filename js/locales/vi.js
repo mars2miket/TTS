@@ -99,6 +99,8 @@ window.__LOCALES__.vi = {
   examMissed: "Các mục sai",
   examBackToList: "Quay lại danh sách",
   dropdownLists: "Danh sách chưa đặt tên",
-  dropdownNotes: "Ghi chú chưa đặt tên"
+  dropdownNotes: "Ghi chú chưa đặt tên",
+  examScoreOutOf: "trên",
+  examCompleteHint: "Nhấp vào Ghi chú và chọn Kết quả kiểm tra trong menu thả xuống để xem điểm của bạn.",
 
 };

@@ -99,5 +99,7 @@ window.__LOCALES__.en = {
   examMissed: "Missed items",
   examBackToList: "Back to List",
   dropdownLists: "Untitled List",
-  dropdownNotes: "Untitled Note"
+  dropdownNotes: "Untitled Note",
+  examScoreOutOf: "out of",
+  examCompleteHint: "Click Notes and select Test Results in the dropdown menu to see how you've scored.",
 };
