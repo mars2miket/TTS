@@ -361,9 +361,16 @@
   // ─── Char count + time estimate ──────────────────────────────────────────
   function updateCharCount() {
     var total = 0;
-    container.querySelectorAll('.data-cell').forEach(function (c) {
-      total += (c.textContent || '').length;
-    });
+    var st = window.getState();
+
+    if (st.viewMode === 'notes') {
+      var noteArea = document.getElementById('note-area');
+      total = noteArea ? noteArea.value.length : 0;
+    } else {
+      container.querySelectorAll('.data-cell').forEach(function (c) {
+        total += (c.textContent || '').length;
+      });
+    }
 
     var charEl = document.getElementById('char-count');
     if (charEl) charEl.textContent = total;

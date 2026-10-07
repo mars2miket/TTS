@@ -102,6 +102,9 @@
 
     // Refresh dropdown options
     refreshDropdown();
+
+    // Refresh char count for the current view
+    if (typeof window.updateCharCount === 'function') window.updateCharCount();
   }
 
   // ─── Dropdown ────────────────────────────────────────────────────────────

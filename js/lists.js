@@ -144,6 +144,20 @@
     var file = e.target.files && e.target.files[0];
     if (!file) return;
 
+      var okExt = /\.(txt|csv|tsv|md)$/i.test(file.name);
+    if (!okExt) {
+      alert('Only .txt, .tsv, .md and .csv files are allowed.');
+      importInput.value = '';
+      return;
+    }
+
+    var MAX_BYTES = 500 * 1024;
+    if (file.size > MAX_BYTES) {
+      alert('File too large. Max 500 KB.');
+      importInput.value = '';
+      return;
+    }
+
     var reader = new FileReader();
     reader.onload = function (ev) {
       var raw = String(ev.target.result || '').replace(/\r\n/g, '\n');

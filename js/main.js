@@ -61,7 +61,7 @@
     // If no list exists yet, create a default one
     var safeLists = lists && Object.keys(lists).length > 0
       ? lists
-      : { 'Untitle List': '' };
+      : { 'Untitled List': '' };
 
     var safeActiveList = activeList && activeList in safeLists
       ? activeList
