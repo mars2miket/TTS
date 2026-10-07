@@ -70,9 +70,59 @@
       window.setState({ lang: lang });
     }
 
-    // Notify dependent modules
+        // Notify dependent modules
     if (typeof window.refreshExamLanguage === 'function') {
       try { window.refreshExamLanguage(); } catch (e) {}
+    }
+
+    // ULTIMATE DIRECT FIX: Rebuild dropdown and restore its precise selection position
+    var selectEl = document.getElementById('view-select');
+    if (selectEl) {
+      var state = (window.getState && window.getState()) || {};
+      var mode = state.viewMode || 'lists';
+      
+      selectEl.innerHTML = '';
+      
+      if (mode === 'lists') {
+        var listNames = Object.keys(state.lists || {});
+        listNames.forEach(function (name) {
+          var op = document.createElement('option');
+          op.value = name;
+          op.textContent = window.getDisplayName ? window.getDisplayName(name, 'lists') : name;
+          selectEl.appendChild(op);
+        });
+        // FIX: Re-bind the value and force the browser select element to acknowledge it
+        if (state.activeList) {
+          selectEl.value = state.activeList;
+        }
+      } else {
+        var noteNames = Object.keys(state.notes || {});
+        noteNames.forEach(function (name) {
+          var op = document.createElement('option');
+          op.value = name;
+          op.textContent = window.getDisplayName ? window.getDisplayName(name, 'notes') : name;
+          selectEl.appendChild(op);
+        });
+        // FIX: Re-bind the value and force the browser select element to acknowledge it
+        if (state.activeNote) {
+          selectEl.value = state.activeNote;
+        }
+      }
+    }
+
+
+
+    // FIX: Force the dropdown menu to instantly redraw in the new language
+    if (typeof window.setState === 'function') {
+      var currentLists = (window.getState && window.getState().lists) || {};
+      window.setState({ lists: Object.assign({}, currentLists) });
+    }
+
+
+        // FIX: Force state mutation trigger to trigger dropdown redraw loop
+    if (typeof window.setState === 'function') {
+      var currentLists = (window.getState && window.getState().lists) || {};
+      window.setState({ lists: Object.assign({}, currentLists) });
     }
   }
 

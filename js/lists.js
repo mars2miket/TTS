@@ -31,20 +31,33 @@
     // Bootstrap: ensure at least one list exists on first load
     var st = window.getState();
     if (Object.keys(st.lists || {}).length === 0) {
-      var defaultName = 'Untitled';
+      var defaultIdentifier = '__DEFAULT_LIST__';
       window.setState({
-        lists: { 'Untitled': '' },
-        activeList: defaultName,
+        lists: {},
+        activeList: defaultIdentifier,
         rows: [{ a: '', b: '' }]
       });
+      var seeded = {};
+      seeded[defaultIdentifier] = '';
+      window.setState({ lists: seeded });
     } else if (!st.activeList || !(st.activeList in st.lists)) {
-      // Refresh restored a stale activeList — fall back to the first
       var first = Object.keys(st.lists)[0];
       window.setState({
         activeList: first,
         rows: parseList(st.lists[first])
       });
     }
+
+    // FIX: Provide a globally safe getDisplayName function so other files don't crash
+    window.getDisplayName = function (key, viewMode) {
+      if (key === '__DEFAULT_LIST__' && viewMode === 'lists') {
+        return (window.__i18n__ && window.__i18n__.t) ? window.__i18n__.t('dropdownLists') : 'Untitled List';
+      }
+      if (key === '__DEFAULT_NOTE__' && viewMode === 'notes') {
+        return (window.__i18n__ && window.__i18n__.t) ? window.__i18n__.t('dropdownNotes') : 'Untitled Note';
+      }
+      return key;
+    };
 
     // Expose functions so the workspace mgmt buttons can call them
     window.listActions = {
@@ -53,6 +66,8 @@
       remove: onDeleteList
     };
   }
+
+  
 
 
   // ─── New / Rename / Delete ───────────────────────────────────────────────

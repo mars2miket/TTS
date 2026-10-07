@@ -18,6 +18,10 @@ window.__LOCALES__.vi = {
   importList: "Nhập danh sách",
   addRow: "+ Thêm hàng",
   clearContent: "Xóa nội dung",
+  addList: "Thêm",
+  editList: "Sửa",
+  expList: "Xuất",
+  impList: "Nhập",
 
   // Note buttons
   newNote: "Ghi chú mới",
@@ -91,5 +95,10 @@ window.__LOCALES__.vi = {
   examQuestionLabel: "Câu",
   examTallyCorrect: "đúng",
   examTallyAnswered: "đã trả lời",
-  examComplete: "Hoàn thành bài kiểm tra."
+  examComplete: "Hoàn thành bài kiểm tra.",
+  examMissed: "Các mục sai",
+  examBackToList: "Quay lại danh sách",
+  dropdownLists: "Danh sách chưa đặt tên",
+  dropdownNotes: "Ghi chú chưa đặt tên"
+
 };

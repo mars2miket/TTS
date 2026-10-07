@@ -58,10 +58,8 @@
       ? rows
       : [{ a: '', b: '' }];
 
-    // If no list exists yet, create a default one
-    var safeLists = lists && Object.keys(lists).length > 0
-      ? lists
-      : { 'Untitled List': '' };
+    // If no list exists yet, leave empty — lists.js creates the default
+    var safeLists = lists || {};
 
     var safeActiveList = activeList && activeList in safeLists
       ? activeList

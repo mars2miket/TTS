@@ -18,6 +18,10 @@ window.__LOCALES__.en = {
   importList: "Import list",
   addRow: "+ Add Row",
   clearContent: "Clear Content",
+  addList: "Add",
+  editList: "Edit",
+  expList: "Exp",
+  impList: "Imp",
 
   // Note buttons
   newNote: "New note",
@@ -91,5 +95,9 @@ window.__LOCALES__.en = {
   examQuestionLabel: "Question",
   examTallyCorrect: "correct",
   examTallyAnswered: "answered",
-  examComplete: "Test complete."
+  examComplete: "Test complete.",
+  examMissed: "Missed items",
+  examBackToList: "Back to List",
+  dropdownLists: "Untitled List",
+  dropdownNotes: "Untitled Note"
 };

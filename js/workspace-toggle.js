@@ -44,13 +44,16 @@
       if (state.viewMode !== prev.viewMode) {
         applyMode();
       }
+      // FIX: Added state.lang check to force a dropdown update when language shifts
       if (state.lists !== prev.lists
        || state.activeList !== prev.activeList
        || state.notes !== prev.notes
-       || state.activeNote !== prev.activeNote) {
+       || state.activeNote !== prev.activeNote
+       || state.lang !== prev.lang) {
         refreshDropdown();
       }
     });
+
 
     // Initial render
     applyMode();
@@ -119,7 +122,14 @@
       listNames.forEach(function (name) {
         var op = document.createElement('option');
         op.value = name;
-        op.textContent = name;
+        
+        // FIX: Dynamically display localized string if the item is the initial default list
+        if (name === 'Untitled List' || name === '__DEFAULT_LIST__') {
+          op.textContent = (window.__i18n__ && window.__i18n__.t) ? window.__i18n__.t('dropdownLists') : 'Untitled List';
+        } else {
+          op.textContent = name;
+        }
+        
         viewSelect.appendChild(op);
       });
 
@@ -132,7 +142,14 @@
       noteNames.forEach(function (name) {
         var op = document.createElement('option');
         op.value = name;
-        op.textContent = name;
+        
+        // FIX: Dynamically display localized string if the item is the initial default note
+        if (name === 'Untitled Note' || name === '__DEFAULT_NOTE__') {
+          op.textContent = (window.__i18n__ && window.__i18n__.t) ? window.__i18n__.t('dropdownNotes') : 'Untitled Note';
+        } else {
+          op.textContent = name;
+        }
+        
         viewSelect.appendChild(op);
       });
 

@@ -29,9 +29,14 @@
     // Bootstrap: ensure at least one note exists on first load
     var st = window.getState();
     if (Object.keys(st.notes || {}).length === 0) {
+      var defaultNote = (window.__i18n__ && window.__i18n__.t)
+        ? window.__i18n__.t('dropdownNotes')
+        : 'Untitled Note';
+      var seededNotes = {};
+      seededNotes[defaultNote] = '';
       window.setState({
-        notes: { 'Untitled Note': '' },
-        activeNote: 'Untitled',
+        notes: seededNotes,
+        activeNote: defaultNote,
         noteActive: false
       });
     } else if (st.activeNote && !(st.activeNote in st.notes)) {
