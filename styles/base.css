@@ -1,184 +1,146 @@
+/* Force modal hidden until JS adds .visible */
+.modal-overlay { display: none !important; }
+.modal-overlay.visible { display: flex !important; }
+
+/* Force exam viewer hidden until JS adds .exam-active */
+#recall-viewer { display: none !important; }
+#recall-viewer.exam-active { display: block !important; }
+
 /* ==========================================================================
-   THEME VARIABLES
+   DESIGN TOKENS
    ========================================================================== */
 :root {
-    --bg-app: #f1f5f9;
-    --bg-surface: #ffffff;
-    --bg-surface-2: #f8fafc;
-    --bg-elevated: #ffffff;
-    --text-primary: #403D4A;
-    --text-muted: #64748b;
-    --border-color: #e2e8f0;
-    --border-strong: #cbd5e1;
-    --scrollbar-track: #f1f5f9;
-    --scrollbar-thumb: #cbd5e1;
-    --scrollbar-thumb-hover: #94a3b8;
-    --control-bg: #ffffff;
-    --control-border: #cbd5e1;
+  /* Surfaces */
+  --bg-app:        #f1f5f9;
+  --bg-surface:    #ffffff;
+  --bg-surface-2:  #f8fafc;
+  --bg-elevated:   #ffffff;
 
-    /* Accent palette — variant B: teal base + purple highlight */
-    --accent-light: #7c5ce8;
-    --accent-mid: #2f5c9c;
-    --accent-deep: #0b4f5c;
-    --accent-soft: rgba(47, 92, 156, 0.10);
-    --accent-glow: rgba(47, 92, 156, 0.28);
+  /* Text */
+  --text-primary:  #403D4A;
+  --text-muted:    #64748b;
+
+  /* Borders */
+  --border-color:  #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  /* Controls */
+  --control-bg:     #ffffff;
+  --control-border: #cbd5e1;
+
+  /* Scrollbar */
+  --scrollbar-track:       #f1f5f9;
+  --scrollbar-thumb:       #cbd5e1;
+  --scrollbar-thumb-hover: #94a3b8;
+
+  /* Accents — teal/purple */
+  --accent-light: #7c5ce8;
+  --accent-mid:   #2f5c9c;
+  --accent-deep:  #0b4f5c;
+  --accent-soft:  rgba(47, 92, 156, 0.10);
+  --accent-glow:  rgba(47, 92, 156, 0.28);
+
+  /* Layout */
+  --sidebar-width: 280px;
+  --topbar-height: 56px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 [data-theme="dark"] {
-    --bg-app: #0f172a;
-    --bg-surface: #1e293b;
-    --bg-surface-2: #172033;
-    --bg-elevated: #334155;
-    --text-primary: #e2e8f0;
-    --text-muted: #94a3b8;
-    --border-color: #334155;
-    --border-strong: #475569;
-    --scrollbar-track: #1e293b;
-    --scrollbar-thumb: #475569;
-    --scrollbar-thumb-hover: #64748b;
-    --control-bg: #1e293b;
-    --control-border: #475569;
+  --bg-app:        #0f172a;
+  --bg-surface:    #1e293b;
+  --bg-surface-2:  #172033;
+  --bg-elevated:   #334155;
+
+  --text-primary:  #e2e8f0;
+  --text-muted:    #94a3b8;
+
+  --border-color:  #334155;
+  --border-strong: #475569;
+
+  --control-bg:     #1e293b;
+  --control-border: #475569;
+
+  --scrollbar-track:       #1e293b;
+  --scrollbar-thumb:       #475569;
+  --scrollbar-thumb-hover: #64748b;
 }
 
 /* ==========================================================================
-   GLOBAL RESET
+   RESET
    ========================================================================== */
-body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: var(--bg-app);
-    color: var(--text-primary);
-    transition: background-color .5s ease, color .5s ease;
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-#lang-toggle { margin-left: auto !important; }
-#m-menu-btn svg { stroke: currentColor !important; }
-#m-menu-btn svg { stroke: #5e5ce8 !important; }
+html, body {
+  margin: 0;
+  padding: 0;
+}
 
-textarea {
-    pointer-events: none;
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  transition: background-color .3s var(--ease), color .3s var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+svg { display: block; }
+
+/* ==========================================================================
+   UTILITY
+   ========================================================================== */
+.is-hidden, [hidden] {
+  display: none !important;
 }
 
 .hidden {
-    display: none !important;
+  display: none !important;
 }
 
 /* ==========================================================================
    SCROLLBARS
    ========================================================================== */
-.controls-sidebar::-webkit-scrollbar-track,
-.spreadsheet-grid::-webkit-scrollbar-track,
-#recall-viewer::-webkit-scrollbar-track,
-.sidebar-scrollable-content::-webkit-scrollbar-track {
-    background: var(--scrollbar-track) !important;
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 }
-.controls-sidebar::-webkit-scrollbar-thumb,
-.spreadsheet-grid::-webkit-scrollbar-thumb,
-#recall-viewer::-webkit-scrollbar-thumb,
-.sidebar-scrollable-content::-webkit-scrollbar-thumb {
-    background-color: var(--scrollbar-thumb) !important;
-    border-radius: 6px !important;
-    border: 2px solid var(--bg-surface) !important;
-    transition: background-color .5s ease;
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
 }
-.controls-sidebar::-webkit-scrollbar-thumb:hover,
-.spreadsheet-grid::-webkit-scrollbar-thumb:hover,
-#recall-viewer::-webkit-scrollbar-thumb:hover,
-.sidebar-scrollable-content::-webkit-scrollbar-thumb:hover {
-    background-color: var(--scrollbar-thumb-hover) !important;
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 6px;
+  border: 2px solid var(--bg-surface);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
 }
 
 /* ==========================================================================
-   APP SHELL
+   THEME ICONS
    ========================================================================== */
-.app-shell {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100vh;
-    height: var(--app-height, 100vh);
-    overflow: hidden;
-}
+.icon-moon { display: block; }
+.icon-sun  { display: none;  }
 
-/* ==========================================================================
-   TOP STICKY BAR
-   ========================================================================== */
-.top-sticky-bar {
-    display: flex;
-    align-items: center;
-    height: 56px;
-    width: 100%;
-    flex-shrink: 0;
-    padding: 0 20px;
-    background-color: var(--bg-surface-2);
-    border-bottom: 1px solid var(--border-color);
-    box-sizing: border-box;
-    transition: background-color .5s ease, border-color .5s ease;
-}
-
-.top-sticky-bar .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--text-primary);
-    flex: 1; 
-}
-
-/* ==========================================================================
-   MASTER LAYOUT
-   ========================================================================== */
-.app-layout-container {
-    display: flex;
-    flex: 1;
-    min-height: 0;
-    width: 100%;
-    box-sizing: border-box;
-    overflow: hidden;
-    position: relative;
-}
-
-.input-workspace {
-    flex-grow: 1;
-    height: 100%;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    padding: 16px;
-    overflow: hidden;
-    box-sizing: border-box;
-}
-
-/* ==========================================================================
-   THEME TOGGLE
-   ========================================================================== */
-.theme-toggle-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    border: 1px solid var(--control-border);
-    border-radius: 6px;
-    background: var(--control-bg);
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: background-color .5s ease,
-                color .5s ease,
-                border-color .5s ease,
-                transform .15s ease;
-}
-.theme-toggle-btn:hover { transform: scale(1.08); }
-.theme-toggle-btn:active { transform: scale(.95); }
-.theme-toggle-btn:focus-visible {
-    outline: 2px solid #60a5fa;
-    outline-offset: 2px;
-}
-
-.theme-toggle-btn .icon-sun  { display: none; }
-.theme-toggle-btn .icon-moon { display: block; }
-[data-theme="dark"] .theme-toggle-btn .icon-sun  { display: block; }
-[data-theme="dark"] .theme-toggle-btn .icon-moon { display: none; }
+[data-theme="dark"] .icon-moon { display: none;  }
+[data-theme="dark"] .icon-sun  { display: block; }

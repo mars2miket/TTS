@@ -1,559 +1,588 @@
-// --- GLOBAL EXAM MODULE CONTEXT ENGINE ---
-let activeExamRows = [];
-let isQuestionActive = false;
-let examMode = 'choice';
-let examReverse = false;
-let examDeck = [];
-let lastExamItem = null;
-let examSignature = '';
-let currentItem = null;
-let examCounter = 0;
-let examCorrectCount = 0;
-let examAnsweredCount = 0;
+/**
+ * exam.js — classic script.
+ * -----------------------------------------------------------------------------
+ * Speed-Grill exam engine. Wires the Start Test button and renders the exam.
+ *
+ * Behaviors:
+ *   • Deck = rows where BOTH cells have content
+ *   • 3 modes: choice | tf | type
+ *   • Direction toggle: A→B or B→A (does NOT restart; applies to remaining deck)
+ *   • Wrong answers dropped, tallied in counter
+ *   • List switching during exam writes partial results first
+ *   • Refresh mid-test → writes partial results, returns to grid
+ *   • Complete → writes results, shows complete card with missed items
+ *   • Results go to a "Results" note (created if missing, appended if not)
+ * -----------------------------------------------------------------------------
+ */
+(function () {
+  'use strict';
 
-function t(key) {
-    return (window.__i18n__ && window.__i18n__.t) ? window.__i18n__.t(key) : key;
-}
+  // ─── Module state ────────────────────────────────────────────────────────
+  var deck = [];                    // remaining items
+  var currentItem = null;           // { prompt, answer }
+  var mode = 'choice';
+  var reverse = false;
+  var counter = 0;
+  var correct = 0;
+  var answered = 0;
+  var missed = [];                  // [{ prompt, answer }]
+  var listName = null;
+  var active = false;
 
-function getExamModes() {
-    return [
-        { id: 'choice', label: t('examMultiChoice') },
-        { id: 'tf',     label: t('examTF') },
-        { id: 'type',   label: t('examFillBlank') }
-    ];
-}
+  // ─── DOM refs (set in init) ──────────────────────────────────────────────
+    var startBtn, backBtn, picker, viewer, grid, gridFooter, hintCard, counterStrip, counterWrap;
+  var gridContainer;
 
-function esc(str) {
-    const d = document.createElement('div');
-    d.textContent = str;
-    return d.innerHTML;
-}
+  // ─── Init ────────────────────────────────────────────────────────────────
+  function initExam() {
+    startBtn      = document.getElementById('start-test-btn');
+    backBtn       = document.getElementById('exam-back-btn');
+    picker        = document.getElementById('exam-list-picker');
+    viewer        = document.getElementById('recall-viewer');
+    counterStrip  = document.getElementById('exam-counter');
+    counterWrap   = document.querySelector('.exam-counter-strip');
+    gridContainer = document.getElementById('spreadsheet-container');
+    gridFooter    = document.querySelector('.grid-footer');
+    hintCard      = document.getElementById('onboarding-hint');
 
-function shuffle(arr) {
-    const a = [...arr];
-    for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
+    if (startBtn) startBtn.addEventListener('click', startExam);
+    if (backBtn)  backBtn.addEventListener('click', exitExam);
+
+    // Restore exam mode on refresh — restart the exam fresh
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        if (window.storage.get('mode') === 'exam') {
+          window.storage.remove('examPartial');
+          startExam();
+        }
+      }, 200);
+    });
+  }
+
+  // ─── Start / Exit ────────────────────────────────────────────────────────
+  function startExam() {
+    var state = window.getState();
+    var rows = state.rows || [];
+
+    // Build deck from rows where both cells have content
+    deck = rows
+      .filter(function (r) { return (r.a || '').trim() && (r.b || '').trim(); })
+      .map(function (r) {
+        var a = r.a.trim(), b = r.b.trim();
+        return reverse
+          ? { prompt: b, answer: a }
+          : { prompt: a, answer: b };
+      });
+
+    if (deck.length === 0) {
+      alert('No testable rows. Fill both columns first.');
+      return;
+    }
+
+    // Shuffle
+    deck = shuffle(deck);
+
+    listName = state.activeList || 'Untitled';
+    counter = 0;
+    correct = 0;
+    answered = 0;
+    missed = [];
+    active = true;
+
+    // Show exam view
+    if (gridContainer) gridContainer.classList.add('exam-hidden');
+    if (gridFooter)    gridFooter.classList.add('exam-hidden');
+    if (hintCard)      hintCard.classList.add('exam-hidden');
+    if (viewer)        viewer.classList.add('exam-active');
+    if (counterWrap)   counterWrap.classList.add('exam-active');
+
+    window.storage.set('mode', 'exam');
+    refreshPicker();
+    renderExamShell();
+
+    nextQuestion();
+  }
+
+  function exitExam() {
+    savePartial();
+    active = false;
+
+    if (gridContainer) gridContainer.classList.remove('exam-hidden');
+    if (gridFooter)    gridFooter.classList.remove('exam-hidden');
+    if (hintCard && !window.storage.get('hintDismissed')) {
+      hintCard.classList.remove('exam-hidden');
+    }
+    if (viewer) viewer.classList.remove('exam-active');
+    if (counterWrap) counterWrap.classList.remove('exam-active');
+
+    window.storage.set('mode', 'grid');
+    window.storage.remove('examPartial');
+  }
+
+  // ─── Deck helpers ────────────────────────────────────────────────────────
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
     }
     return a;
-}
+  }
 
-function buildModeBar() {
-    const modeBar = document.createElement('div');
-    modeBar.className = 'exam-mode-row';
-    getExamModes().forEach(m => {
-        const b = document.createElement('button');
-        b.className = 'exam-mode-btn' + (m.id === examMode ? ' active' : '');
-        b.dataset.mode = m.id;
-        b.textContent = m.label;
-        b.addEventListener('click', () => {
-            examMode = m.id;
-            if (currentItem) {
-                drawActiveQuestion(currentItem);
-            } else {
-                renderShell();
-            }
-        });
-        modeBar.appendChild(b);
-    });
+  function nextQuestion() {
+    if (deck.length === 0) {
+      completeExam();
+      return;
+    }
+    currentItem = deck.pop();
+    counter++;
+    renderQuestion();
+    updateCounter();
+  }
 
-    const dirBtn = document.createElement('button');
-    dirBtn.className = 'exam-mode-btn';
-    dirBtn.id = 'exam-dir-btn';
-    dirBtn.style.flex = '0 0 auto';
-    dirBtn.textContent = examReverse ? 'B → A' : 'A → B';
-    dirBtn.addEventListener('click', () => {
-        examReverse = !examReverse;
-        isQuestionActive = false;
-        currentItem = null;
-        examSignature = '';
-        generateMockTest();
-    });
-    modeBar.appendChild(dirBtn);
-    return modeBar;
-}
+  // ─── Counter ─────────────────────────────────────────────────────────────
+  function updateCounter() {
+    if (!counterStrip) return;
+    counterStrip.textContent =
+      'Question ' + counter + ' · ' + correct + ' correct / ' + answered + ' answered';
+  }
 
-function buildShell() {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'exam-question-wrapper';
+  // ─── Render shell (topbar + empty card) ──────────────────────────────────
+  function renderExamShell() {
+    if (!viewer) return;
 
-    wrapper.appendChild(buildModeBar());
+    // Preserve topbar
+    var topbar = viewer.querySelector('.exam-topbar');
+    viewer.innerHTML = '';
+    if (topbar) viewer.appendChild(topbar);
 
-    const promptP = document.createElement('p');
-    promptP.id = 'exam-prompt-line';
-    promptP.innerHTML = `<strong>${t('examPrompt')}:</strong> <span id="exam-prompt-text"></span>`;
-    wrapper.appendChild(promptP);
+    // Wrapper
+    var wrap = document.createElement('div');
+    wrap.className = 'exam-question-wrapper';
+    viewer.appendChild(wrap);
+  }
 
-    const body = document.createElement('div');
-    body.id = 'exam-body';
-    body.className = 'exam-body';
-    wrapper.appendChild(body);
+  function getWrapper() {
+    return viewer ? viewer.querySelector('.exam-question-wrapper') : null;
+  }
 
-    const actions = document.createElement('div');
-    actions.className = 'exam-actions-row';
-    actions.style.cssText = 'display: flex; gap: 8px;';
+  // ─── Render current question ─────────────────────────────────────────────
+  function renderQuestion() {
+    var wrap = getWrapper();
+    if (!wrap) {
+      renderExamShell();
+      wrap = getWrapper();
+    }
+    wrap.innerHTML = '';
 
-    const checkBtn = document.createElement('button');
-    checkBtn.id = 'exam-submit-btn';
-    checkBtn.className = 'primary-btn';
-    checkBtn.style.flex = '1';
-    checkBtn.textContent = t('examCheck');
-    actions.appendChild(checkBtn);
+    // Mode row
+    wrap.appendChild(buildModeRow());
 
-    const nextBtn = document.createElement('button');
+    // Direction toggle
+    wrap.appendChild(buildDirectionBtn());
+
+    // Prompt
+    var prompt = document.createElement('div');
+    prompt.className = 'prompt-line';
+    prompt.innerHTML = '<strong>Exam Prompt: </strong>' + escapeHtml(currentItem.prompt);
+    wrap.appendChild(prompt);
+
+    // Answer area
+    var body = document.createElement('div');
+    body.className = 'exam-body mode-' + mode;
+    wrap.appendChild(body);
+
+    var feedback = document.createElement('div');
+    feedback.className = 'exam-feedback';
+    wrap.appendChild(feedback);
+
+    var nextRow = document.createElement('div');
+    nextRow.className = 'next-row';
+    var nextBtn = document.createElement('button');
+    nextBtn.className = 'answer-btn primary';
     nextBtn.id = 'exam-next-btn';
-    nextBtn.className = 'primary-btn';
-    nextBtn.style.flex = '1';
-    nextBtn.textContent = t('examNext');
-    actions.appendChild(nextBtn);
-    wrapper.appendChild(actions);
+    nextBtn.textContent = 'Next →';
+    nextBtn.disabled = true;
+    nextBtn.addEventListener('click', function () {
+      nextQuestion();
+    });
+    nextRow.appendChild(nextBtn);
+    wrap.appendChild(nextRow);
 
-    const feedback = document.createElement('p');
-    feedback.id = 'exam-feedback';
-    feedback.style.cssText = 'margin-top: 12px; font-weight: bold; min-height: 20px;';
-    wrapper.appendChild(feedback);
+    // Pass the next button into the answer builders so they can enable it
+    if (mode === 'choice') buildChoice(body, feedback, nextBtn);
+    else if (mode === 'tf') buildTF(body, feedback, nextBtn);
+    else buildType(body, feedback, nextBtn);
+  }
 
-    return wrapper;
-}
+  function buildModeRow() {
+    var row = document.createElement('div');
+    row.className = 'mode-row';
 
-function getShell() {
-    return recallViewer.querySelector('.exam-question-wrapper');
-}
+    var modes = [
+      { id: 'choice', label: 'Multi Choice' },
+      { id: 'tf',     label: 'T / F' },
+      { id: 'type',   label: 'Fill-in-Blank' }
+    ];
 
-function refreshShellChrome(wrapper) {
-    // Refresh the Exam Prompt label, Check Answer, and Next buttons
-    const promptLine = wrapper.querySelector('#exam-prompt-line');
-    if (promptLine) {
-        const existingText = promptLine.querySelector('#exam-prompt-text');
-        const preservedPrompt = existingText ? existingText.innerHTML : '';
-        promptLine.innerHTML = `<strong>${t('examPrompt')}:</strong> <span id="exam-prompt-text">${preservedPrompt}</span>`;
-    }
-    const checkBtn = wrapper.querySelector('#exam-submit-btn');
-    if (checkBtn) checkBtn.textContent = t('examCheck');
-    const nextBtn = wrapper.querySelector('#exam-next-btn');
-    if (nextBtn) nextBtn.textContent = t('examNext');
-}
-
-function renderShell() {
-    let wrapper = getShell();
-    if (!wrapper) {
-        wrapper = buildShell();
-        recallViewer.appendChild(wrapper);
-    }
-
-    const oldModeBar = wrapper.querySelector('.exam-mode-row');
-    if (oldModeBar) oldModeBar.replaceWith(buildModeBar());
-
-    refreshShellChrome(wrapper);
-
-    const promptText = wrapper.querySelector('#exam-prompt-text');
-    if (promptText) promptText.textContent = '';
-
-    const body = wrapper.querySelector('#exam-body');
-    if (body) {
-        body.className = 'exam-body mode-' + examMode;
-        body.innerHTML = '';
-
-        if (examMode === 'type') {
-            const p = document.createElement('p');
-            p.innerHTML = `<strong>${t('examYourAnswer')}:</strong> <input type="text" id="exam-user-input" autocomplete="off" style="margin-bottom: 8px; width: 100%; box-sizing: border-box; padding: 8px;" disabled>`;
-            body.appendChild(p);
-        } else if (examMode === 'choice') {
-            for (let i = 0; i < 3; i++) {
-                const b = document.createElement('button');
-                b.className = 'exam-choice';
-                b.disabled = true;
-                b.textContent = '\u00A0';
-                body.appendChild(b);
-            }
-        } else if (examMode === 'tf') {
-            const p = document.createElement('p');
-            p.innerHTML = `<strong>${t('examProposedAnswer')}:</strong> <span></span>`;
-            body.appendChild(p);
-            [t('examTrue'), t('examFalse')].forEach(label => {
-                const b = document.createElement('button');
-                b.className = 'exam-choice';
-                b.disabled = true;
-                b.textContent = label;
-                body.appendChild(b);
-            });
-        } else if (examMode === 'select') {
-            for (let i = 0; i < 3; i++) {
-                const lbl = document.createElement('label');
-                lbl.className = 'exam-check';
-                const cb = document.createElement('input');
-                cb.type = 'checkbox';
-                cb.disabled = true;
-                const span = document.createElement('span');
-                span.innerHTML = '&nbsp;';
-                lbl.appendChild(cb);
-                lbl.appendChild(span);
-                body.appendChild(lbl);
-            }
-        }
-    }
-
-    const checkBtn = wrapper.querySelector('#exam-submit-btn');
-    const nextBtn = wrapper.querySelector('#exam-next-btn');
-    if (checkBtn) checkBtn.disabled = true;
-    if (nextBtn) nextBtn.disabled = true;
-
-    const feedback = wrapper.querySelector('#exam-feedback');
-    if (feedback) feedback.textContent = '';
-
-    const counterEl = document.getElementById('exam-counter');
-    if (counterEl) counterEl.textContent = '';
-
-    isQuestionActive = false;
-    currentItem = null;
-}
-
-function resetExam() {
-    activeExamRows = [];
-    examDeck = [];
-    examSignature = '';
-    lastExamItem = null;
-    isQuestionActive = false;
-    currentItem = null;
-    renderShell();
-}
-
-function generateMockTest() {
-    activeExamRows = [];
-    examCounter = 0;
-    examCorrectCount = 0;
-    examAnsweredCount = 0;
-    spreadsheetContainer.querySelectorAll('.data-cell[data-col="A"]').forEach(cellA => {
-        const rowNum = cellA.dataset.row;
-        const cellB = spreadsheetContainer.querySelector(`.data-cell[data-row="${rowNum}"][data-col="B"]`);
-        if (cellA.textContent.trim() && cellB && cellB.textContent.trim()) {
-            const valA = cellA.textContent.trim();
-            const valB = cellB.textContent.trim();
-            activeExamRows.push(examReverse
-                ? { prompt: valB, answer: valA }
-                : { prompt: valA, answer: valB });
-        }
+    modes.forEach(function (m) {
+      var b = document.createElement('button');
+      b.className = 'mode-btn' + (m.id === mode ? ' active' : '');
+      b.textContent = m.label;
+      b.addEventListener('click', function () {
+        if (mode === m.id) return;
+        mode = m.id;
+        renderQuestion();
+      });
+      row.appendChild(b);
     });
 
-    if (activeExamRows.length === 0) {
-        examSignature = '';
-        examDeck = [];
-        isQuestionActive = false;
-        currentItem = null;
-        renderShell();
-        return;
-    }
+    return row;
+  }
 
-    const newSignature = JSON.stringify(activeExamRows);
-    if (newSignature !== examSignature) {
-        examSignature = newSignature;
-        examDeck = shuffle(activeExamRows);
-    }
-
-    const item = drawNextItem();
-    drawActiveQuestion(item);
-}
-
-function drawNextItem() {
-    if (examDeck.length === 0) {
-        return null;
-    }
-    lastExamItem = examDeck.pop();
-    return lastExamItem;
-}
-
-function showFeedback(el, correct, expected) {
-    examAnsweredCount++;
-    if (correct) examCorrectCount++;
-    const counterEl = document.getElementById('exam-counter');
-    if (counterEl) counterEl.textContent = `${t('examQuestionLabel')} ${examCounter} · ${examCorrectCount} ${t('examTallyCorrect')} / ${examAnsweredCount} ${t('examTallyAnswered')}`;
-
-    if (correct) {
-        el.textContent = t('examCorrect');
-        el.style.color = "green";
-    } else {
-        el.textContent = `${t('examIncorrect')} "${expected}"`;
-        el.style.color = "red";
-    }
-}
-
-function drawCompleteState() {
-    const wrapper = getShell();
-    if (!wrapper) return;
-
-    const promptText = wrapper.querySelector('#exam-prompt-text');
-    if (promptText) promptText.textContent = '';
-
-    const body = wrapper.querySelector('#exam-body');
-    if (body) {
-        body.className = 'exam-body';
-        body.innerHTML = `<p style="text-align:center;font-size:18px;font-weight:700;">${t('examComplete')}</p>
-            <p style="text-align:center;font-size:15px;">${examCorrectCount} ${t('examTallyCorrect')} / ${examAnsweredCount} ${t('examTallyAnswered')}</p>`;
-    }
-
-    const feedback = wrapper.querySelector('#exam-feedback');
-    if (feedback) feedback.textContent = '';
-
-    const checkBtn = wrapper.querySelector('#exam-submit-btn');
-    if (checkBtn) checkBtn.disabled = true;
-
-    const nextBtn = wrapper.querySelector('#exam-next-btn');
-    if (nextBtn) nextBtn.disabled = true;
-
-    isQuestionActive = false;
-}
-
-function drawActiveQuestion(item) {
-    const isNewItem = (currentItem !== item);
-    if (isNewItem) examCounter++;
-    const counterEl = document.getElementById('exam-counter');
-    if (counterEl) counterEl.textContent = `${t('examQuestionLabel')} ${examCounter} · ${examCorrectCount} ${t('examTallyCorrect')} / ${examAnsweredCount} ${t('examTallyAnswered')}`;
-
-    currentItem = item;
-    isQuestionActive = true;
-
-    let wrapper = getShell();
-    if (!wrapper) {
-        wrapper = buildShell();
-        recallViewer.appendChild(wrapper);
-    }
-
-    const oldModeBar = wrapper.querySelector('.exam-mode-row');
-    if (oldModeBar) oldModeBar.replaceWith(buildModeBar());
-
-    refreshShellChrome(wrapper);
-
-    const promptText = wrapper.querySelector('#exam-prompt-text');
-    if (promptText) promptText.innerHTML = esc(item.prompt);
-
-    const body = wrapper.querySelector('#exam-body');
-    body.className = 'exam-body mode-' + examMode;
-    body.innerHTML = '';
-
-    const feedback = wrapper.querySelector('#exam-feedback');
-    feedback.textContent = '';
-    feedback.style.color = '';
-
-    const checkBtn = wrapper.querySelector('#exam-submit-btn');
-    const nextBtn = wrapper.querySelector('#exam-next-btn');
-
-    nextBtn.disabled = false;
-    checkBtn.disabled = (examMode !== 'type' && examMode !== 'select');
-
-    if (examMode === 'choice') buildChoiceQuestion(item, body, feedback);
-    else if (examMode === 'tf') buildTFQuestion(item, body, feedback);
-    else if (examMode === 'select') buildSelectQuestion(item, body, feedback, checkBtn);
-    else buildTypeQuestion(item, body, feedback, checkBtn);
-
-    const newNext = nextBtn.cloneNode(true);
-    nextBtn.parentNode.replaceChild(newNext, nextBtn);
-    newNext.addEventListener('click', () => {
-        if (activeExamRows.length === 0) {
-            renderShell();
-            return;
-        }
-        const next = drawNextItem();
-        if (next === null) {
-            drawCompleteState();
-            return;
-        }
-        drawActiveQuestion(next);
+  function buildDirectionBtn() {
+    var btn = document.createElement('button');
+    btn.className = 'dir-btn';
+    btn.textContent = reverse ? 'B → A' : 'A → B';
+    btn.addEventListener('click', function () {
+      reverse = !reverse;
+      // Rebuild remaining deck in new direction, keep current question as-is
+      rebuildRemainingDeck();
+      renderQuestion();
     });
-}
+    return btn;
+  }
 
+  function rebuildRemainingDeck() {
+    var state = window.getState();
+    var rows = state.rows || [];
+    var allItems = rows
+      .filter(function (r) { return (r.a || '').trim() && (r.b || '').trim(); })
+      .map(function (r) {
+        var a = r.a.trim(), b = r.b.trim();
+        return reverse
+          ? { prompt: b, answer: a }
+          : { prompt: a, answer: b };
+      });
 
-function buildTypeQuestion(item, body, feedback, checkBtn) {
-    body.innerHTML = `
-        <p><strong>${t('examYourAnswer')}:</strong> <input type="text" id="exam-user-input" autocomplete="off" style="margin-bottom: 8px; width: 100%; box-sizing: border-box; padding: 8px;"></p>
-    `;
-    const input = body.querySelector('#exam-user-input');
-    input.focus();
+    // Keep only items that haven't been served yet (match by prompt+answer)
+    var served = {};
+    missed.forEach(function (m) { served[m.prompt + '|' + m.answer] = true; });
+    if (currentItem) served[currentItem.prompt + '|' + currentItem.answer] = true;
 
-    const newCheck = checkBtn.cloneNode(true);
-    newCheck.disabled = false;
-    checkBtn.parentNode.replaceChild(newCheck, checkBtn);
-
-    newCheck.addEventListener('click', () => {
-        const correct = input.value.trim().toLowerCase() === item.answer.toLowerCase();
-        showFeedback(feedback, correct, item.answer);
+    // We don't have a good way to know which correct items were served.
+    // Track served correctly as we go.
+    deck = allItems.filter(function (item) {
+      return !isServed(item);
     });
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            newCheck.click();
-        }
+    deck = shuffle(deck);
+  }
+
+  var servedItems = {};
+  function markServed(item) {
+    servedItems[item.prompt + '|' + item.answer] = true;
+  }
+  function isServed(item) {
+    return !!servedItems[item.prompt + '|' + item.answer];
+  }
+
+  // ─── Answer builders ─────────────────────────────────────────────────────
+  function buildChoice(body, feedback, nextBtn) {
+    var all = window.getState().rows || [];
+    var wrongPool = [];
+    var seen = {};
+    all.forEach(function (r) {
+      var a = (r.a || '').trim(), b = (r.b || '').trim();
+      if (!a || !b) return;
+      var ans = reverse ? a : b;
+      if (ans === currentItem.answer) return;
+      if (seen[ans]) return;
+      seen[ans] = true;
+      wrongPool.push(ans);
     });
-}
+    wrongPool = shuffle(wrongPool).slice(0, 3);
 
-function buildChoiceQuestion(item, body, feedback) {
-    const wrong = shuffle([...new Set(activeExamRows.map(r => r.answer))]
-        .filter(a => a.toLowerCase() !== item.answer.toLowerCase())).slice(0, 3);
-    const options = shuffle([item.answer, ...wrong]);
+    var options = shuffle([currentItem.answer].concat(wrongPool));
 
-    options.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.className = 'exam-choice';
-        btn.textContent = opt;
-        btn.addEventListener('click', () => {
-            const correct = opt === item.answer;
-            body.querySelectorAll('.exam-choice').forEach(b => {
-                b.disabled = true;
-                if (b.textContent === item.answer) b.classList.add('correct');
-            });
-            if (!correct) btn.classList.add('wrong');
-            showFeedback(feedback, correct, item.answer);
+    options.forEach(function (opt) {
+      var btn = document.createElement('button');
+      btn.className = 'answer-btn';
+      btn.textContent = opt;
+      btn.addEventListener('click', function () {
+        body.querySelectorAll('.answer-btn').forEach(function (b) {
+          b.disabled = true;
+          if (b.textContent === currentItem.answer) b.classList.add('correct');
         });
-        body.appendChild(btn);
+        if (opt !== currentItem.answer) {
+          btn.classList.add('wrong');
+          recordMiss();
+        } else {
+          correct++;
+        }
+        answered++;
+        updateCounter();
+        markServed(currentItem);
+        savePartial();
+        showFeedback(feedback, opt === currentItem.answer, currentItem.answer);
+        if (nextBtn) nextBtn.disabled = false;
+      });
+      body.appendChild(btn);
     });
-}
+  }
 
-function buildTFQuestion(item, body, feedback) {
-    const wrongPool = [...new Set(activeExamRows.map(r => r.answer))]
-        .filter(a => a.toLowerCase() !== item.answer.toLowerCase());
-    const isTrue = wrongPool.length === 0 || Math.random() < 0.5;
-    const shown = isTrue ? item.answer : wrongPool[Math.floor(Math.random() * wrongPool.length)];
+  function buildTF(body, feedback, nextBtn) {
+    var state = window.getState();
+    var rows = state.rows || [];
+    var wrongPool = [];
+    var seen = {};
+    rows.forEach(function (r) {
+      var a = (r.a || '').trim(), b = (r.b || '').trim();
+      if (!a || !b) return;
+      var ans = reverse ? a : b;
+      if (ans === currentItem.answer) return;
+      if (seen[ans]) return;
+      seen[ans] = true;
+      wrongPool.push(ans);
+      if (nextBtn) nextBtn.disabled = false;
+    });
 
-    const statement = document.createElement('p');
-    statement.innerHTML = `<strong>${t('examProposedAnswer')}:</strong> ${esc(shown)}`;
+    var isTrue = wrongPool.length === 0 || Math.random() < 0.5;
+    var shown = isTrue
+      ? currentItem.answer
+      : wrongPool[Math.floor(Math.random() * wrongPool.length)];
+
+    var statement = document.createElement('div');
+    statement.className = 'tf-statement';
+    statement.textContent = shown;
     body.appendChild(statement);
 
-    const trueLabel = t('examTrue');
-    const falseLabel = t('examFalse');
-
-    [true, false].forEach(val => {
-        const btn = document.createElement('button');
-        btn.className = 'exam-choice';
-        btn.textContent = val ? trueLabel : falseLabel;
-        btn.dataset.tfval = val ? 'true' : 'false';
-        btn.addEventListener('click', () => {
-            const correct = val === isTrue;
-            body.querySelectorAll('.exam-choice').forEach(b => {
-                b.disabled = true;
-                if ((b.dataset.tfval === 'true') === isTrue) b.classList.add('correct');
-            });
-            if (!correct) btn.classList.add('wrong');
-            showFeedback(feedback, correct, isTrue ? trueLabel : falseLabel);
+    ['True', 'False'].forEach(function (label) {
+      var val = label === 'True';
+      var btn = document.createElement('button');
+      btn.className = 'answer-btn';
+      btn.textContent = label;
+      btn.addEventListener('click', function () {
+        var isCorrect = val === isTrue;
+        body.querySelectorAll('.answer-btn').forEach(function (b) {
+          b.disabled = true;
+          var correctBtn = (b.textContent === 'True') === isTrue;
+          if (correctBtn) b.classList.add('correct');
         });
-        body.appendChild(btn);
-    });
-}
-
-/*
-function buildSelectQuestion(item, body, feedback, checkBtn) { ... }
-*/
-
-
-
-(function initExamShell() {
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            if (!window.noteActive) renderShell();
-        });
-    } else {
-        if (!window.noteActive) renderShell();
-    }
-})();
-
-window.refreshExamLanguage = function () {
-    if (currentItem && isQuestionActive) {
-        drawActiveQuestion(currentItem);
-    } else {
-        renderShell();
-    }
-};
-window.renderShell = renderShell;
-
-// --- EXAM TOPBAR WIRING ---
-(function initExamTopbar() {
-    const picker = document.getElementById('exam-list-picker');
-    const backBtn = document.getElementById('exam-back-btn');
-    if (!picker || !backBtn) return;
-
-    backBtn.addEventListener('click', () => window.exitExamView());
-
-    picker.addEventListener('change', () => {
-        const name = picker.value;
-        if (typeof window.switchList === 'function') {
-            window.switchList(name);
-            // restart the exam with the new list
-            if (typeof generateMockTest === 'function') generateMockTest();
+        if (!isCorrect) {
+          btn.classList.add('wrong');
+          recordMiss();
+        } else {
+          correct++;
         }
+        answered++;
+        updateCounter();
+        markServed(currentItem);
+        savePartial();
+        showFeedback(feedback, isCorrect, isTrue ? 'True' : 'False');
+      });
+      body.appendChild(btn);
+    });
+  }
+
+  function buildType(body, feedback, nextBtn) {
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'answer-input';
+    input.placeholder = 'Your answer';
+    input.autocomplete = 'off';
+
+    var submit = document.createElement('button');
+    submit.className = 'answer-btn primary';
+    submit.textContent = 'Check Answer';
+    submit.addEventListener('click', function () {
+      var given = input.value.trim().toLowerCase();
+      var expected = currentItem.answer.trim().toLowerCase();
+      var isCorrect = given === expected;
+
+      input.disabled = true;
+      submit.disabled = true;
+
+      if (!isCorrect) {
+        recordMiss();
+        submit.classList.add('wrong');
+      } else {
+        correct++;
+      }
+      answered++;
+      updateCounter();
+      markServed(currentItem);
+      savePartial();
+      showFeedback(feedback, isCorrect, currentItem.answer);
     });
 
-    window.refreshExamPicker = function () {
-        const store = window.listStore || {};
-        const active = localStorage.getItem('whActiveList');
-        picker.innerHTML = '';
-        Object.keys(store).forEach(name => {
-            const op = document.createElement('option');
-            op.value = name;
-            op.textContent = name;
-            picker.appendChild(op);
-        });
-        if (active) picker.value = active;
-    };
-})();
-
-// --- START TEST ENTRY / EXIT ---
-(function initStartTestEntry() {
-    const btn = document.getElementById('start-test-btn');
-    if (!btn) return;
-
-    btn.addEventListener('click', () => {
-        const grid = document.getElementById('spreadsheet-container');
-        const caption = document.querySelector('.grid-caption');
-        const footer = document.querySelector('.grid-footer');
-
-        grid.classList.add('exam-hidden');
-        if (caption) caption.classList.add('exam-hidden');
-        if (footer) footer.classList.add('exam-hidden');
-        const hint = document.getElementById('onboarding-hint');
-        if (hint) hint.classList.add('exam-hidden');
-
-        recallViewer.classList.add('exam-active');
-        try { localStorage.setItem('whMode', 'exam'); } catch (e) {}
-        if (typeof window.refreshExamPicker === 'function') window.refreshExamPicker();
-
-        generateMockTest();
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); submit.click(); }
     });
-})();
 
-// --- EXIT EXAM (return to grid) ---
-window.exitExamView = function () {
-    const grid = document.getElementById('spreadsheet-container');
-    const caption = document.querySelector('.grid-caption');
-    const footer = document.querySelector('.grid-footer');
+    body.appendChild(input);
+    body.appendChild(submit);
+    input.focus();
+    if (nextBtn) nextBtn.disabled = false;
+  }
 
-    grid.classList.remove('exam-hidden');
-    if (caption) caption.classList.remove('exam-hidden');
-    if (footer) footer.classList.remove('exam-hidden');
+  function showFeedback(el, correct, expected) {
+    el.innerHTML = correct
+      ? '<span class="ok">✅ Correct</span>'
+      : '<span class="bad">❌ Incorrect</span> — correct answer: <strong>' + escapeHtml(expected) + '</strong>';
+  }
 
-    const hint = document.getElementById('onboarding-hint');
-    if (hint && !localStorage.getItem('recallrx-hint-dismissed')) {
-        hint.classList.remove('exam-hidden');
+  function recordMiss() {
+    missed.push({ prompt: currentItem.prompt, answer: currentItem.answer });
+  }
+
+  // ─── Save partial (refresh/closing safety net) ───────────────────────────
+  function savePartial() {
+    window.storage.set('examPartial', {
+      listName: listName,
+      correct: correct,
+      answered: answered,
+      missed: missed.slice()
+    });
+  }
+
+  // ─── Complete ────────────────────────────────────────────────────────────
+  function completeExam() {
+    active = false;
+
+    // Write results to Results note
+    writeResultsToNote({
+      listName: listName,
+      correct: correct,
+      answered: answered,
+      missed: missed.slice()
+    }, false);
+
+    // Render complete card
+    var wrap = getWrapper();
+    if (!wrap) return;
+    wrap.innerHTML = '';
+
+    var card = document.createElement('div');
+    card.className = 'exam-complete-card';
+
+    var title = document.createElement('h3');
+    title.textContent = 'Test complete';
+    card.appendChild(title);
+
+    var score = document.createElement('p');
+    score.className = 'exam-score';
+    score.textContent = 'Score ' + correct + '/' + answered;
+    card.appendChild(score);
+
+    if (missed.length > 0) {
+      var h = document.createElement('h4');
+      h.textContent = 'Missed items';
+      card.appendChild(h);
+
+      var ul = document.createElement('ul');
+      ul.className = 'missed-list';
+      missed.forEach(function (m) {
+        var li = document.createElement('li');
+        li.textContent = m.prompt + ' → ' + m.answer;
+        ul.appendChild(li);
+      });
+      card.appendChild(ul);
     }
 
-    recallViewer.classList.remove('exam-active');
-    try { localStorage.setItem('whMode', 'grid'); } catch (e) {}
-};
-
-// --- RESTORE EXAM VIEW ON REFRESH ---
-(function restoreExamMode() {
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            try {
-                if (localStorage.getItem('whMode') === 'exam') {
-                    const grid = document.getElementById('spreadsheet-container');
-                    const caption = document.querySelector('.grid-caption');
-                    const footer = document.querySelector('.grid-footer');
-                    if (grid) grid.classList.add('exam-hidden');
-                    if (caption) caption.classList.add('exam-hidden');
-                    if (footer) footer.classList.add('exam-hidden');
-                    recallViewer.classList.add('exam-active');
-                    if (typeof window.refreshExamPicker === 'function') window.refreshExamPicker();
-                    generateMockTest();
-                }
-            } catch (e) {}
-        }, 100);
+    var back = document.createElement('button');
+    back.className = 'answer-btn primary';
+    back.textContent = 'Back to List';
+    back.addEventListener('click', function () {
+      window.storage.set('mode', 'grid');
+      window.storage.remove('examPartial');
+      exitExam();
     });
+    card.appendChild(back);
+
+    wrap.appendChild(card);
+
+    window.storage.set('mode', 'grid');
+    window.storage.remove('examPartial');
+  }
+
+  // ─── Results note ────────────────────────────────────────────────────────
+  function writeResultsToNote(result, isPartial) {
+    var state = window.getState();
+    var notes = Object.assign({}, state.notes);
+    var existing = notes['Results'] || '';
+
+    var date = formatDate(new Date());
+    var line = date + ', ' + result.listName + ' — Score ' + result.correct + '/' + result.answered;
+    var body = line + '\n';
+
+    if (result.missed && result.missed.length > 0) {
+      result.missed.forEach(function (m) {
+        body += m.prompt + ' → ' + m.answer + '\n';
+      });
+    }
+    body += '---\n';
+
+    notes['Results'] = (existing ? existing + '\n' : '') + body;
+    window.setState({ notes: notes });
+  }
+
+  function formatDate(d) {
+    var y = d.getFullYear();
+    var m = String(d.getMonth() + 1).padStart(2, '0');
+    var day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
+  }
+
+  // ─── List picker (topbar) ────────────────────────────────────────────────
+  function refreshPicker() {
+    if (!picker) return;
+    var state = window.getState();
+    var names = Object.keys(state.lists || {});
+    picker.innerHTML = '';
+    names.forEach(function (name) {
+      var op = document.createElement('option');
+      op.value = name;
+      op.textContent = name;
+      picker.appendChild(op);
+    });
+    if (state.activeList) picker.value = state.activeList;
+    picker.onchange = onPickerChange;
+  }
+
+  function onPickerChange() {
+    var newName = picker.value;
+    var state = window.getState();
+    if (newName === state.activeList) return;
+
+    // Save partial to Results, then switch
+    savePartial();
+    var partial = window.storage.get('examPartial');
+    if (partial && partial.answered > 0) {
+      writeResultsToNote(partial, true);
+    }
+    window.storage.remove('examPartial');
+
+    // Switch list — reuse lists.js machinery via state mutation
+    var lists = Object.assign({}, state.lists);
+    lists[state.activeList] = window.serializeGrid();
+    window.setState({
+      lists: lists,
+      activeList: newName,
+      rows: window.parseList(lists[newName])
+    });
+
+    // Restart exam with new list
+    active = false;
+    startExam();
+  }
+
+  // ─── Helpers ─────────────────────────────────────────────────────────────
+  function escapeHtml(str) {
+    var d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  // Expose
+  window.initExam = initExam;
 })();
