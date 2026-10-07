@@ -1,5 +1,5 @@
 /**
- * exam.js — classic script.
+ * exam-v2.js — classic script.
  * -----------------------------------------------------------------------------
  * Speed-Grill exam engine. Wires the Start Test button and renders the exam.
  * -----------------------------------------------------------------------------
@@ -23,6 +23,7 @@
   var missed = [];
   var listName = null;
   var active = false;
+  var examComplete = false;
 
   // ─── DOM refs ────────────────────────────────────────────────────────────
   var startBtn, backBtn, picker, viewer, grid, gridFooter, hintCard, counterStrip, counterWrap;
@@ -80,6 +81,7 @@
     answered = 0;
     missed = [];
     active = true;
+    examComplete = false;
 
     if (gridContainer) gridContainer.classList.add('exam-hidden');
     if (gridFooter)    gridFooter.classList.add('exam-hidden');
@@ -427,6 +429,7 @@
   // ─── Complete ────────────────────────────────────────────────────────────
   function completeExam() {
     active = false;
+    examComplete = true;
 
     writeResultsToNote({
       listName: listName,
@@ -435,6 +438,13 @@
       missed: missed.slice()
     }, false);
 
+    renderCompleteCard();
+
+    window.storage.set('mode', 'grid');
+    window.storage.remove('examPartial');
+  }
+
+  function renderCompleteCard() {
     var wrap = getWrapper();
     if (!wrap) return;
     wrap.innerHTML = '';
@@ -477,9 +487,6 @@
     card.appendChild(back);
 
     wrap.appendChild(card);
-
-    window.storage.set('mode', 'grid');
-    window.storage.remove('examPartial');
   }
 
   // ─── Results note ────────────────────────────────────────────────────────
@@ -551,8 +558,6 @@
   }
 
   // ─── Language reactivity ─────────────────────────────────────────────────
-  // Called by i18n.js on language change. Re-renders the active question
-  // (or the empty shell) so all labels pick up the new language.
   function refreshExamLanguage() {
     var wrap = getWrapper();
     if (!wrap) return;
