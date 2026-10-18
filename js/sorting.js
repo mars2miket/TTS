@@ -1,89 +1,76 @@
 /**
  * --- SPREADSHEET ROW-SYNCHRONIZED SORTING ENGINE ---
+ * Sorts the state rows, then asks grid.js to re-render.
  */
 
 function sortSpreadsheetByColumn(letter) {
-    const container = window.spreadsheetContainer || document.querySelector('.spreadsheet-container') || document.getElementById('spreadsheetContainer');
-    if (!container) return;
+  var state = window.getState();
+  var rows = (state.rows || []).slice();
 
-    const rowsData = [];
+  // Keep only rows that have content in at least one column
+  var filled = rows.filter(function (r) {
+    return (r.a && r.a.trim()) || (r.b && r.b.trim());
+  });
 
-    container.querySelectorAll('.data-cell[data-col="A"]').forEach(cellA => {
-        const rowNum = cellA.dataset.row;
-        const cellB = container.querySelector(`.data-cell[data-row="${rowNum}"][data-col="B"]`);
+  if (filled.length === 0) return;
 
-        const valA = (cellA.textContent || "").trim();
-        const valB = cellB ? (cellB.textContent || "").trim() : "";
+  // Track sort direction per column
+  var dirKey = letter === 'A' ? 'sortDirA' : 'sortDirB';
+  var currentDir = window.__sortDirs__ && window.__sortDirs__[dirKey];
+  var nextDir = currentDir === 'asc' ? 'desc' : 'asc';
 
-        if (valA === "" && valB === "") {
-            return;
-        }
+  window.__sortDirs__ = window.__sortDirs__ || {};
+  window.__sortDirs__[dirKey] = nextDir;
 
-        rowsData.push({ valA, valB });
-    });
+  filled.sort(function (rowX, rowY) {
+    var textX = ((letter === 'A' ? rowX.a : rowX.b) || '').toLowerCase();
+    var textY = ((letter === 'A' ? rowY.a : rowY.b) || '').toLowerCase();
 
-    if (rowsData.length === 0) return;
+    if (textX === '' && textY !== '') return 1;
+    if (textX !== '' && textY === '') return -1;
+    if (textX === '' && textY === '') return 0;
 
-    if (!container.dataset.sortDirA) container.dataset.sortDirA = 'asc';
-    if (!container.dataset.sortDirB) container.dataset.sortDirB = 'asc';
+    return textX.localeCompare(textY);
+  });
 
-    rowsData.sort((rowX, rowY) => {
-        const textX = (letter === 'A' ? rowX.valA : rowX.valB).toLowerCase();
-        const textY = (letter === 'A' ? rowY.valA : rowY.valB).toLowerCase();
+  if (nextDir === 'desc') filled.reverse();
 
-        if (textX === "" && textY !== "") return 1;
-        if (textX !== "" && textY === "") return -1;
-        if (textX === "" && textY === "") return 0;
+  // Always append one trailing blank row (grid.js also enforces this)
+  filled.push({ a: '', b: '' });
 
-        return textX.localeCompare(textY);
-    });
+  window.setState({ rows: filled });
 
-    const stateKey = letter === 'A' ? 'sortDirA' : 'sortDirB';
-    if (container.dataset[stateKey] === 'asc') {
-        rowsData.reverse();
-        container.dataset[stateKey] = 'desc';
-    } else {
-        container.dataset[stateKey] = 'asc';
-    }
-
-    container.querySelectorAll('.data-cell').forEach(c => c.remove());
-
-    rowsData.forEach((rowData, index) => {
-        createRowCells(index + 1, rowData.valA, rowData.valB);
-    });
-
-    if (typeof updateCharacterCount === 'function') {
-        updateCharacterCount();
-    }
-
-    try {
-        if (window.textBox && typeof textBox.value !== 'undefined') {
-            localStorage.setItem('savedSpreadsheetGridData', textBox.value);
-        }
-    } catch (err) {
-        console.warn('localStorage save failed inside sorting engine:', err);
-    }
+  // Force the grid to re-render from the new state
+  if (typeof window.__gridRerender__ === 'function') {
+    window.__gridRerender__();
+  }
+  if (typeof window.updateCharCount === 'function') {
+    window.updateCharCount();
+  }
+  if (typeof window.syncStartTestButton === 'function') {
+    window.syncStartTestButton();
+  }
 }
 
 function initializeSortingControls() {
-    const container = window.spreadsheetContainer || document.querySelector('.spreadsheet-container') || document.getElementById('spreadsheetContainer');
-    if (!container) return;
+  var container = document.getElementById('spreadsheet-container');
+  if (!container) return;
 
-    container.querySelectorAll('.header-cell').forEach(headerEl => {
-        const columnLetter = headerEl.dataset.col;
-        const sortBtn = headerEl.querySelector('.header-sort-btn');
+  container.querySelectorAll('.header-cell').forEach(function (headerEl) {
+    var columnLetter = headerEl.dataset.col;
+    var sortBtn = headerEl.querySelector('.header-sort-btn');
 
-        if (sortBtn) {
-            sortBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                sortSpreadsheetByColumn(columnLetter);
-            });
-        }
-    });
+    if (sortBtn) {
+      sortBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        sortSpreadsheetByColumn(columnLetter);
+      });
+    }
+  });
 }
 
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeSortingControls);
+  document.addEventListener('DOMContentLoaded', initializeSortingControls);
 } else {
-    initializeSortingControls();
+  initializeSortingControls();
 }

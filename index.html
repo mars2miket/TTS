@@ -70,8 +70,6 @@
 
         <aside class="controls-sidebar">
           <div class="sidebar-scrollable-content">
-
-
             <!-- ─── Voices ─── -->
             <div class="acc-section" data-acc="voices">
               <div class="acc-header">
@@ -95,58 +93,66 @@
 
             <!-- ─── Footer: timer + metrics ─── -->
             <div class="sidebar-footer">
-              <div class="footer-block">
-                <div class="footer-block">
-                  <div class="footer-label" data-i18n="controls">Controls</div>
-                  <p class="ctrl-label">
-                    <span data-i18n="speed">Speed</span>:
-                    <strong id="speed-value" class="speed-value">0.75x</strong>
-                  </p>
-                  <input type="range" id="speed-slider" min="0.25" max="2" step="0.25" value="0.75" class="slider">
+              <div class="acc-section open" data-acc="controls">
+                <div class="acc-header">
+                  <span data-i18n="controls">Controls</span>
+                  <span class="acc-chevron">▸</span>
+                </div>
+                <div class="acc-body">
+                  <div class="acc-body-inner">
+                    <p class="ctrl-label">
+                      <span data-i18n="speed">Speed</span>:
+                      <strong id="speed-value" class="speed-value">0.75x</strong>
+                    </p>
+                    <input type="range" id="speed-slider" min="0.25" max="2" step="0.25" value="0.75" class="slider">
 
-                  <div class="playback-row">
-                    <button id="rewind-btn" class="pb-btn" title="Rewind" aria-label="Rewind">
-                      <svg viewBox="0 0 24 24">
-                        <polygon points="11 6 11 18 3 12" />
-                        <polygon points="21 6 21 18 13 12" />
-                        <line x1="21" y1="6" x2="21" y2="18" />
-                      </svg>
-                    </button>
-                    <button id="stop-btn" class="pb-btn" title="Stop" aria-label="Stop">
-                      <svg viewBox="0 0 24 24">
-                        <rect x="6" y="6" width="12" height="12" rx="2" />
-                      </svg>
-                    </button>
-                    <button id="read-btn" class="pb-btn play-pause" title="Read" aria-label="Read">
-                      <svg class="icon-play" viewBox="0 0 24 24">
-                        <polygon points="8 5 19 12 8 19" />
-                      </svg>
-                      <svg class="icon-pause" viewBox="0 0 24 24">
-                        <rect x="6" y="5" width="4" height="14" rx="1" />
-                        <rect x="14" y="5" width="4" height="14" rx="1" />
-                      </svg>
-                    </button>
-                    <button id="forward-btn" class="pb-btn" title="Forward" aria-label="Forward">
-                      <svg viewBox="0 0 24 24">
-                        <polygon points="3 6 3 18 11 12" />
-                        <polygon points="13 6 13 18 21 12" />
-                        <line x1="3" y1="6" x2="3" y2="18" />
-                      </svg>
-                    </button>
-                    <button id="loop-check" class="pb-btn loop-off" title="Loop" aria-label="Loop">
-                      <svg viewBox="0 0 24 24">
-                        <path d="M17 2l4 4-4 4" />
-                        <path d="M3 11v-1a4 4 0 0 1 4-4h14" />
-                        <path d="M7 22l-4-4 4-4" />
-                        <path d="M21 13v1a4 4 0 0 1-4 4H3" />
-                      </svg>
-                    </button>
+                    <div class="playback-row">
+                      <button id="rewind-btn" class="pb-btn" title="Rewind" aria-label="Rewind">
+                        <svg viewBox="0 0 24 24">
+                          <polygon points="11 6 11 18 3 12" />
+                          <polygon points="21 6 21 18 13 12" />
+                          <line x1="21" y1="6" x2="21" y2="18" />
+                        </svg>
+                      </button>
+                      <button id="stop-btn" class="pb-btn" title="Stop" aria-label="Stop">
+                        <svg viewBox="0 0 24 24">
+                          <rect x="6" y="6" width="12" height="12" rx="2" />
+                        </svg>
+                      </button>
+                      <button id="read-btn" class="pb-btn play-pause" title="Read" aria-label="Read">
+                        <svg class="icon-play" viewBox="0 0 24 24">
+                          <polygon points="8 5 19 12 8 19" />
+                        </svg>
+                        <svg class="icon-pause" viewBox="0 0 24 24">
+                          <rect x="6" y="5" width="4" height="14" rx="1" />
+                          <rect x="14" y="5" width="4" height="14" rx="1" />
+                        </svg>
+                      </button>
+                      <button id="forward-btn" class="pb-btn" title="Forward" aria-label="Forward">
+                        <svg viewBox="0 0 24 24">
+                          <polygon points="3 6 3 18 11 12" />
+                          <polygon points="13 6 13 18 21 12" />
+                          <line x1="3" y1="6" x2="3" y2="18" />
+                        </svg>
+                      </button>
+                      <button id="loop-check" class="pb-btn loop-off" title="Loop" aria-label="Loop">
+                        <svg viewBox="0 0 24 24">
+                          <path d="M17 2l4 4-4 4" />
+                          <path d="M3 11v-1a4 4 0 0 1 4-4h14" />
+                          <path d="M7 22l-4-4 4-4" />
+                          <path d="M21 13v1a4 4 0 0 1-4 4H3" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
+              </div>
+
+              <div class="footer-block">
                 <div class="footer-label" data-i18n="timer">Timer</div>
                 <div class="ctrl-row">
                   <div id="timer-display" class="timer-display">00:00.0</div>
-                  <button id="timer-reset-btn" class="ctrl-btn half" data-i18n="resetTimer">Reset Timer</button>
+                  <button id="timer-reset-btn" class="ctrl-btn half" data-i18n="resetTimer">Reset</button>
                 </div>
               </div>
 
@@ -166,68 +172,90 @@
           <div class="hint-card" id="onboarding-hint">
             <button class="hint-dismiss" id="onboarding-dismiss" type="button" aria-label="Dismiss">×</button>
             <h4 data-i18n="onboardingTitle">Welcome</h4>
-            <p data-i18n="onboardingBody">Paste or type your data into the grid below. Both columns must have data.</p>
+            <p data-i18n="onboardingBody">Turn any two-column list into a memory test. Hide a column, quiz yourself, and
+              track what you missed.</p>
             <ul class="hint-list">
+              <li data-i18n="onboardingBullet0">First, add data to both columns</li>
               <li data-i18n="onboardingBullet1">Click <strong>Hide Col A</strong> or <strong>Hide Col B</strong> to mask
                 a column and self-test</li>
-              <li data-i18n="onboardingBullet2">Click <strong>Start Test</strong> for a graded quiz with
+              <li data-i18n="onboardingBullet2">To test your memory, click Start Test for a graded quiz with
                 multiple-choice, T/F, or fill-in-blank modes</li>
-              <li data-i18n="onboardingBullet3">Use the <strong>Lists / Notes</strong> toggle to organize multiple decks
-                or keep notes</li>
-              <li data-i18n="onboardingBullet4">Press <strong>▶</strong> to hear your list read aloud at any speed</li>
+              <li data-i18n="onboardingBullet3">Use the Lists / Notes toggle to organize multiple decks or keep notes
+              </li>
+              <li data-i18n="onboardingBullet4">Press ▶ to hear your list read aloud content in Notes or Lists</li>
               <li data-i18n="onboardingBullet5">Everything saves automatically to your browser</li>
             </ul>
           </div>
 
           <!-- View toggle + dynamic dropdown + management -->
           <div class="view-switch">
-            <div class="seg-toggle" id="seg-toggle">
-              <button class="seg-btn active" data-mode="lists" type="button" data-i18n="lists">Lists</button>
-              <button class="seg-btn" data-mode="notes" type="button" data-i18n="notes">Notes</button>
+            <div class="view-switch-top">
+              <div class="seg-toggle" id="seg-toggle">
+                <button class="seg-btn active" data-mode="lists" type="button" data-i18n="lists">Lists</button>
+                <button class="seg-btn" data-mode="notes" type="button" data-i18n="notes">Notes</button>
+                <button class="seg-btn" data-mode="analytics" type="button" data-i18n="analytics">Analytics</button>
+              </div>
+
+              <button id="hint-show-btn" class="mgmt-btn" type="button" data-i18n-title="showHint"
+                aria-label="Show help">?</button>
             </div>
 
             <div class="view-row">
               <select id="view-select" class="ctrl-select"></select>
               <div class="mgmt-group">
-                <button id="mgmt-new-btn" class="mgmt-btn" type="button" data-i18n-title="addList" data-i18n="addList">Add</button>
-                <button id="mgmt-rename-btn" class="mgmt-btn" type="button" data-i18n-title="editList" data-i18n="editList">Edit</button>
-                <button id="list-export-btn" class="mgmt-btn" type="button" data-i18n-title="expList" data-i18n="expList">Exp</button>
-                <button id="list-import-btn" class="mgmt-btn" type="button" data-i18n-title="impList" data-i18n="impList">Imp</button>
+                <button id="mgmt-new-btn" class="mgmt-btn" type="button" data-i18n-title="addList"
+                  data-i18n="addList">Add</button>
+                <button id="mgmt-rename-btn" class="mgmt-btn" type="button" data-i18n-title="editList"
+                  data-i18n="editList">Edit</button>
+                <button id="list-export-btn" class="mgmt-btn" type="button" data-i18n-title="expList"
+                  data-i18n="expList">Exp</button>
+                <button id="list-import-btn" class="mgmt-btn" type="button" data-i18n-title="impList"
+                  data-i18n="impList">Imp</button>
                 <button id="mgmt-delete-btn" class="mgmt-btn" type="button" data-i18n-title="deleteList">🗑</button>
               </div>
             </div>
           </div>
 
+          <!-- ═══════════════ LIST WORKSPACE ═══════════════ -->
+          <div id="grid-workspace">
 
-          <!-- Grid -->
-          <div id="spreadsheet-container" class="spreadsheet-grid">
-            <div class="cell header-cell" data-col="A">
-              <div class="header-split-wrapper">
-                <span class="header-label" data-col="A" data-i18n="hideColA">Hide Col A</span>
-                <button class="header-sort-btn" title="Sort">⇅</button>
+            <div id="spreadsheet-container" class="spreadsheet-grid">
+              <div class="cell header-cell" data-col="A">
+                <div class="header-split-wrapper">
+                  <span class="header-label" data-col="A" data-i18n="hideColA">Hide Col A</span>
+                  <button class="header-sort-btn" title="Sort">⇅</button>
+                </div>
+                <div class="resizer"></div>
               </div>
-              <div class="resizer"></div>
+              <div class="cell header-cell" data-col="B">
+                <div class="header-split-wrapper">
+                  <span class="header-label" data-col="B" data-i18n="hideColB">Hide Col B</span>
+                  <button class="header-sort-btn" title="Sort">⇅</button>
+                </div>
+              </div>
             </div>
-            <div class="cell header-cell" data-col="B">
-              <div class="header-split-wrapper">
-                <span class="header-label" data-col="B" data-i18n="hideColB">Hide Col B</span>
-                <button class="header-sort-btn" title="Sort">⇅</button>
-              </div>
+
+            <div class="grid-footer">
+              <div class="grid-helper" data-i18n="startTestHelper">When you're ready, test your memory.</div>
+              <button id="start-test-btn" class="start-test-btn" type="button" data-i18n="startTestBtn" disabled>
+                Start Test
+              </button>
             </div>
           </div>
 
-          <!-- Footer / Start Test -->
-          <div class="grid-footer">
-            <div class="grid-helper" data-i18n="startTestHelper">When you're ready, test your memory.</div>
-            <button id="start-test-btn" class="start-test-btn" type="button" data-i18n="startTestBtn" disabled>
-              Start Test
-            </button>
+          <!-- ═══════════════ NOTES WORKSPACE ═══════════════ -->
+          <div id="notes-workspace">
+            <textarea id="note-area" placeholder="Type or paste your note..." spellcheck="false"></textarea>
+            <div id="note-resizer"></div>
           </div>
+
+          <!-- ═══════════════ ANALYTICS WORKSPACE ═══════════════ -->
+          <div id="analytics-workspace"></div>
 
           <!-- Exam counter strip -->
           <div class="exam-counter-strip">
-            <span id="exam-counter" class="exam-counter"></span><button id="exam-back-btn" class="exam-back-btn"
-              type="button" data-i18n="examBackBtn">← Back to Lists</button>
+            <span id="exam-counter" class="exam-counter"></span>
+            <button id="exam-back-btn" class="exam-back-btn" type="button" data-i18n="examBackBtn">← Back</button>
           </div>
 
           <!-- Exam viewer -->
@@ -239,10 +267,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Notes textarea (hidden unless note-mode) -->
-          <textarea id="note-area" placeholder="Type or paste your note..." spellcheck="false"></textarea>
-          <div id="note-resizer"></div>
 
         </main>
       </div>
@@ -330,7 +354,6 @@
 
   </div>
 
-
   <!-- Step 2: data layer -->
   <script src="js/storage.js"></script>
   <script src="js/state.js"></script>
@@ -344,6 +367,7 @@
 
   <!-- Step 4: grid -->
   <script src="js/grid.js"></script>
+  <script src="js/sorting.js"></script>
 
   <!-- Step 5: modal + lists + notes -->
   <script src="js/modal.js"></script>
@@ -353,8 +377,9 @@
   <!-- Step 6: speech -->
   <script src="js/speech.js"></script>
 
-  <!-- Step 7: exam -->
-  <script src="js/exam-v2.js"></script>
+  <!-- Step 7: exam + analytics + workspace toggle -->
+  <script src="js/exam.js"></script>
+  <script src="js/analytics.js"></script>
   <script src="js/workspace-toggle.js"></script>
 
   <!-- Bootstrap last -->

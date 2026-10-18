@@ -3,7 +3,7 @@
  * -----------------------------------------------------------------------------
  * Handles:
  *   • First-run seed: writes sample data to localStorage once
- *   • Onboarding hint card dismiss (persists to localStorage)
+ *   • Onboarding hint card dismiss + "show again" (?) button
  * -----------------------------------------------------------------------------
  */
 (function () {
@@ -11,7 +11,7 @@
 
   function initOnboarding() {
     seedSampleData();
-    initHintDismiss();
+    initHintCard();
   }
 
   // ─── Sample data seed (first run only) ───────────────────────────────────
@@ -19,7 +19,6 @@
     try {
       if (window.storage.get('onboarded')) return;
 
-      // Only seed if the user has no real data yet
       var existingRows = window.storage.get('rows', []);
       var hasRealData = Array.isArray(existingRows) && existingRows.some(function (r) {
         return (r.a && r.a.trim()) || (r.b && r.b.trim());
@@ -31,7 +30,6 @@
                 || (window.SAMPLE_DATA && window.SAMPLE_DATA.en);
       if (!sample) return;
 
-      // Convert sample (array of [a, b] pairs) → rows shape
       var rows = sample.map(function (pair) {
         return { a: pair[0] || '', b: pair[1] || '' };
       });
@@ -46,21 +44,64 @@
     }
   }
 
-  // ─── Hint card dismiss ───────────────────────────────────────────────────
-  function initHintDismiss() {
+  // ─── Hint card: dismiss + re-show ────────────────────────────────────────
+  function initHintCard() {
     var hint = document.getElementById('onboarding-hint');
-    var btn = document.getElementById('onboarding-dismiss');
-    if (!hint || !btn) return;
+    var showBtn = document.getElementById('hint-show-btn');
+    if (!hint) return;
 
-    if (window.storage.get('hintDismissed')) {
-      hint.remove();
-      return;
+    // Cache original markup + parent so we can re-inject later
+    var hintHTML = hint.outerHTML;
+    var hintParent = hint.parentNode;
+    var anchor = hintParent.querySelector('.view-switch');
+
+    function bindDismiss(scope) {
+      var btn = scope.querySelector('#onboarding-dismiss');
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        scope.remove();
+        window.storage.set('hintDismissed', true);
+        if (showBtn) showBtn.style.display = '';
+      });
     }
 
-    btn.addEventListener('click', function () {
-      hint.remove();
-      window.storage.set('hintDismissed', true);
-    });
+    function applyHintVisibility() {
+      var dismissed = !!window.storage.get('hintDismissed');
+      var existing = document.getElementById('onboarding-hint');
+
+      if (showBtn) showBtn.style.display = dismissed ? '' : 'none';
+
+      if (dismissed && existing) {
+        existing.remove();
+      } else if (!dismissed && !existing) {
+        var temp = document.createElement('div');
+        temp.innerHTML = hintHTML;
+        var fresh = temp.firstElementChild;
+        if (anchor && anchor.parentNode === hintParent) {
+          hintParent.insertBefore(fresh, anchor);
+        } else {
+          hintParent.appendChild(fresh);
+        }
+        bindDismiss(fresh);
+        if (window.__i18n__ && window.__i18n__.apply) {
+          window.__i18n__.apply(window.__i18n__.get());
+        }
+      }
+    }
+
+    // Wire dismiss on the original card
+    bindDismiss(hint);
+
+    // Initial state
+    applyHintVisibility();
+
+    // Wire "show again" button (only if present in HTML)
+    if (showBtn) {
+      showBtn.addEventListener('click', function () {
+        window.storage.set('hintDismissed', false);
+        applyHintVisibility();
+      });
+    }
   }
 
   // Expose

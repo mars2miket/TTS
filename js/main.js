@@ -1,7 +1,7 @@
 /**
  * main.js — classic script, no modules.
  * -----------------------------------------------------------------------------
- * Bootstrap. Loads after state.js and storage.js.
+ * Bootstrap. Loads after state.js, storage.js, and analytics.js.
  *
  * Step 2 responsibilities:
  *   1. Run storage migration
@@ -20,7 +20,7 @@
   var setState   = window.setState;
   var subscribe  = window.subscribe;
 
-    // ─── Sample data for first-run seed ─────────────────────────────────────
+  // ─── Sample data for first-run seed ─────────────────────────────────────
   window.SAMPLE_DATA = {
     en: [
       ["hello", "xin chào"],
@@ -51,7 +51,7 @@
     var voiceName    = storage.get('voiceName', null);
     var examMode     = storage.get('examMode', 'choice');
     var examReverse  = storage.get('examReverse', false);
-    var viewMode = storage.get('viewMode', 'lists');
+    var viewMode     = storage.get('viewMode', 'lists');
 
     // Ensure at least one empty row exists
     var safeRows = Array.isArray(rows) && rows.length > 0
@@ -109,7 +109,7 @@
     selectedVoiceName: 'voiceName',
     examMode:          'examMode',
     examReverse:       'examReverse',
-    viewMode: 'viewMode'
+    viewMode:          'viewMode'
   };
 
   subscribe(function (state, prev) {
@@ -119,17 +119,25 @@
       }
     });
   });
-})();
 
   // ─── 4. Kick off UI modules ─────────────────────────────────────────────
-  if (typeof window.initModal === 'function')      window.initModal();
-  if (typeof window.initNav === 'function')        window.initNav();
-  if (typeof window.initGrid === 'function')       window.initGrid();
-  if (typeof window.initLists === 'function')      window.initLists();
-  if (typeof window.initNotes === 'function')      window.initNotes();
-  if (typeof window.initSpeech === 'function')     window.initSpeech();
-  if (typeof window.initExam === 'function')       window.initExam();
-  if (typeof window.initOnboarding === 'function') window.initOnboarding();
-  if (typeof window.initWorkspaceToggle === 'function') window.initWorkspaceToggle();
+  function safeInit(name) {
+    var fn = window[name];
+    if (typeof fn !== 'function') return;
+    try { fn(); }
+    catch (err) { console.error('[RecallRx] ' + name + ' failed:', err); }
+  }
 
-  console.log('[RecallRx] Data layer ready.');
+  safeInit('initModal');
+  safeInit('initNav');
+  safeInit('initGrid');
+  safeInit('initLists');
+  safeInit('initNotes');
+  safeInit('initSpeech');
+  safeInit('initExam');
+  safeInit('initAnalytics');
+  safeInit('initOnboarding');
+  safeInit('initWorkspaceToggle');
+
+  console.log('[RecallRx] Data layer ready with Analytics support.');
+})();

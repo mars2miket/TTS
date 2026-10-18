@@ -1,6 +1,6 @@
 /**
  * workspace-toggle.js — classic script.
- * Manages the [Lists | Notes] toggle and the dynamic dropdown below it.
+ * Manages the [Lists | Notes | Analytics] toggle and the dynamic dropdown below it.
  */
 (function () {
   'use strict';
@@ -44,7 +44,7 @@
       if (state.viewMode !== prev.viewMode) {
         applyMode();
       }
-      // FIX: Added state.lang check to force a dropdown update when language shifts
+      // Added state.lang check to force a dropdown update when language shifts
       if (state.lists !== prev.lists
        || state.activeList !== prev.activeList
        || state.notes !== prev.notes
@@ -53,7 +53,6 @@
         refreshDropdown();
       }
     });
-
 
     // Initial render
     applyMode();
@@ -65,7 +64,7 @@
     if (state.viewMode === mode) return;
 
     // Save the current grid into its list before leaving Lists mode
-    if (mode === 'notes' && typeof window.serializeGrid === 'function') {
+    if (state.viewMode === 'lists' && typeof window.serializeGrid === 'function') {
       var lists = Object.assign({}, state.lists);
       if (state.activeList) {
         lists[state.activeList] = window.serializeGrid();
@@ -73,9 +72,8 @@
       }
     }
 
-    // Sync noteActive flag
+    // Sync noteActive flag and update state layout keys
     if (mode === 'notes') {
-      // Bootstrap guarantees at least one note exists
       var lastNote = state.activeNote;
       var noteExists = lastNote && lastNote in state.notes;
       var targetNote = noteExists ? lastNote : Object.keys(state.notes)[0];
@@ -84,12 +82,19 @@
         noteActive: !!targetNote,
         activeNote: targetNote || null
       });
+    } else if (mode === 'analytics') {
+      window.setState({
+        viewMode: 'analytics',
+        noteActive: false,
+        activeNote: null // Clears note selection so it doesn't try to show grid or notes
+      });
     } else {
       window.setState({
         viewMode: 'lists',
         noteActive: false
       });
     }
+
 
     applyMode();
   }
@@ -98,13 +103,19 @@
     var state = window.getState();
     var mode = state.viewMode || 'lists';
 
-    // Toggle active state
+    // Set the view mode on the body element so CSS rules can hide/show containers
+    document.body.setAttribute('data-view-mode', mode);
+
+    // Toggle active state on the segmented layout buttons
     toggle.querySelectorAll('.seg-btn').forEach(function (b) {
       b.classList.toggle('active', b.dataset.mode === mode);
     });
 
-    // Refresh dropdown options
-    refreshDropdown();
+
+    // Refresh dropdown options only if we are browsing structured content tiers
+    if (mode !== 'analytics') {
+      refreshDropdown();
+    }
 
     // Refresh char count for the current view
     if (typeof window.updateCharCount === 'function') window.updateCharCount();
@@ -115,6 +126,7 @@
     var state = window.getState();
     var mode = state.viewMode || 'lists';
 
+    if (!viewSelect) return;
     viewSelect.innerHTML = '';
 
     if (mode === 'lists') {
@@ -123,7 +135,6 @@
         var op = document.createElement('option');
         op.value = name;
         
-        // FIX: Dynamically display localized string if the item is the initial default list
         if (name === 'Untitled List' || name === '__DEFAULT_LIST__') {
           op.textContent = (window.__i18n__ && window.__i18n__.t) ? window.__i18n__.t('dropdownLists') : 'Untitled List';
         } else {
@@ -137,13 +148,12 @@
         ? state.activeList
         : (listNames[0] || '');
 
-    } else {
+    } else if (mode === 'notes') {
       var noteNames = Object.keys(state.notes || {});
       noteNames.forEach(function (name) {
         var op = document.createElement('option');
         op.value = name;
         
-        // FIX: Dynamically display localized string if the item is the initial default note
         if (name === 'Untitled Note' || name === '__DEFAULT_NOTE__') {
           op.textContent = (window.__i18n__ && window.__i18n__.t) ? window.__i18n__.t('dropdownNotes') : 'Untitled Note';
         } else {
@@ -167,7 +177,6 @@
       if (!name || !(name in state.lists)) return;
       if (name === state.activeList) return;
 
-      // Save current grid into outgoing list
       var lists = Object.assign({}, state.lists);
       if (state.activeList) {
         lists[state.activeList] = window.serializeGrid();
@@ -183,7 +192,7 @@
       if (typeof window.updateCharCount === 'function') window.updateCharCount();
       if (typeof window.syncStartTestButton === 'function') window.syncStartTestButton();
 
-    } else {
+    } else if (state.viewMode === 'notes') {
       if (!name || !(name in state.notes)) return;
 
       window.setState({

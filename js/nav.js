@@ -112,9 +112,7 @@
       if (!header) return;
 
       header.addEventListener('click', function () {
-        var isOpen = section.classList.contains('open');
-        sections.forEach(function (s) { s.classList.remove('open'); });
-        if (!isOpen) section.classList.add('open');
+        section.classList.toggle('open');
       });
     });
   }

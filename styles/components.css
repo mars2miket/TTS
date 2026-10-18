@@ -83,13 +83,13 @@
    ========================================================================== */
 .ctrl-input,
 .ctrl-select {
-    width: 100%;
-  padding: 8px 10px;
+  width: 100%;
+  padding: 6px 10px;
   border: 1px solid var(--control-border);
   border-radius: 6px;
   background-color: var(--control-bg);
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: 17px;
   color-scheme: dark;
 }
 
@@ -237,7 +237,7 @@
 
 .hint-card h4 {
   margin: 0 0 6px 0;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--accent-light);
   font-weight: 700;
   text-transform: uppercase;
@@ -246,7 +246,7 @@
 
 .hint-card p {
   margin: 0;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.45;
   padding-right: 20px;
 }
@@ -258,7 +258,7 @@
   background: transparent;
   border: none;
   color: var(--text-muted);
-  font-size: 18px;
+  font-size: 22px;
   padding: 0;
   line-height: 1;
 }
@@ -333,11 +333,11 @@
 }
 
 .cell {
-  padding: 10px;
+  padding: 6px;
   border-right: 1px solid var(--border-strong);
   border-bottom: 1px solid var(--border-strong);
   min-height: 42px;
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.5;
   box-sizing: border-box;
 }
@@ -419,8 +419,10 @@
    ========================================================================== */
 .grid-footer {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   flex-shrink: 0;
   position: sticky;
   bottom: 0;
@@ -431,14 +433,15 @@
 }
 
 .grid-helper {
-  font-size: 12px;
+  font-size: 16px;
   color: var(--text-muted);
   text-align: center;
 }
 
 .start-test-btn {
-  width: 100%;
-  padding: 12px;
+  padding: 6px 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 700;
@@ -479,6 +482,7 @@
   min-height: 0;
 }
 
+#grid-workspace.exam-hidden,
 #spreadsheet-container.exam-hidden,
 .grid-caption.exam-hidden,
 .grid-footer.exam-hidden,
@@ -918,13 +922,6 @@
   cursor: not-allowed;
 }
 
-.view-switch {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
 .seg-toggle {
   display: flex;
   background: var(--bg-surface);
@@ -934,10 +931,10 @@
 }
 
 .seg-btn {
-  flex: 1;
-  padding: 10px;
+  padding: 4px 12px;
+  white-space: nowrap;
   text-align: center;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   border-radius: 6px;
   background: transparent;
@@ -1011,7 +1008,7 @@
   margin: 10px 0 0 0;
   padding-left: 18px;
   list-style: disc;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.6;
   color: var(--text-muted);
 }
@@ -1023,6 +1020,30 @@
 .hint-card .hint-list strong {
   color: var(--text-primary, #eef2f9);
   font-weight: 600;
+}
+
+
+.hint-show-btn {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface-2);
+  color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.hint-show-btn:hover {
+  background: var(--bg-surface);
+  border-color: var(--text-muted);
+  color: var(--text-primary);
 }
 
 /* ==========================================================================
@@ -1128,4 +1149,160 @@
 @keyframes underline-draw {
   from { transform: scaleX(0); }
   to   { transform: scaleX(1); }
+}
+
+.view-switch {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.view-switch-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.view-switch-top .mgmt-btn {
+  margin-left: auto;
+}
+
+/**
+ * Analytics Dashboard CSS Component Layout 
+ * Styles the dynamic #analytics-workspace container cards.
+ */
+
+#analytics-workspace {
+  width: 100%;
+  margin-top: 1.5rem;
+  box-sizing: border-box;
+}
+
+/* 2-Column Responsive Flex Grid */
+.analytics-summary-grid {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Base Analytics Info Blocks */
+.stat-card {
+  flex: 1;
+  min-width: 200px;
+  background-color: var(--bg-surface-2);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 8px;
+  padding: 1.25rem;
+  box-sizing: border-box;
+}
+
+.stat-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.stat-number {
+  margin: 0;
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--accent-color, #4caf50);
+}
+
+/* Troubled Items Deck Layout */
+.trouble-list-card {
+  width: 100%;
+}
+
+.trouble-list-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0 0;
+}
+
+.trouble-list-card li {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid var(--border-color, #333);
+}
+
+.trouble-list-card li:last-child {
+  border-bottom: none;
+}
+
+.missed-word-text {
+  font-family: monospace;
+  font-size: 0.95rem;
+}
+
+.missed-count {
+  font-size: 0.85rem;
+  color: #ff5252;
+  font-weight: 600;
+}
+
+/* Fallback messages */
+.empty-state, .success-message {
+  text-align: center;
+  padding: 2rem;
+  opacity: 0.7;
+  font-style: italic;
+}
+
+/**
+ * Workspace Visibility Rules
+ * Toggles the main display containers based on the active state view mode attribute.
+ */
+
+/* 1. Hide everything by default */
+#grid-workspace,
+#notes-workspace,
+#analytics-workspace {
+  display: none;
+}
+
+/* 1. Hide all workspaces by default */
+#grid-workspace,
+#notes-workspace,
+#analytics-workspace {
+  display: none;
+}
+
+/* 2. Show the active workspace */
+[data-view-mode="lists"] #grid-workspace {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+[data-view-mode="notes"] #notes-workspace {
+  display: block;
+}
+
+[data-view-mode="analytics"] #analytics-workspace {
+  display: block;
+}
+
+/* 3. Exam mode: hide the grid workspace entirely */
+[data-view-mode="lists"] #grid-workspace.exam-hidden {
+  display: none;
+}
+
+/* Hide exam viewer when not in Lists mode */
+[data-view-mode="notes"] #recall-viewer,
+[data-view-mode="notes"] .exam-counter-strip,
+[data-view-mode="analytics"] #recall-viewer,
+[data-view-mode="analytics"] .exam-counter-strip {
+  display: none;
+}
+/* Hide list/notes toolbar and in-exam list picker during exam */
+.view-switch.exam-hidden,
+#recall-viewer.exam-active .exam-topbar {
+  display: none !important;
 }
