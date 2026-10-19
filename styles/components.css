@@ -207,14 +207,6 @@
 .pb-btn.play-pause.is-playing .icon-play  { display: none; }
 .pb-btn.play-pause.is-playing .icon-pause { display: block; }
 
-.prompt-line {
-  margin-bottom: 30px;
-}
-
-.dir-btn {
-  margin: 20px 0 20px 0;
-}
-
 /* ==========================================================================
    TIMER
    ========================================================================== */
@@ -1102,11 +1094,43 @@
   flex: 1;
 }
 
+.view-row { position: relative; }
+
 .mgmt-group {
-  display: flex;
-  gap: 4px;
-  flex-shrink: 0;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 150px;
+  padding: 6px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  z-index: 50;
 }
+
+.mgmt-group.open { display: flex; }
+
+.mgmt-group .mgmt-btn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  height: auto;
+  min-height: 40px;
+  padding: 0 14px;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  text-align: left;
+}
+
+.mgmt-group .mgmt-btn:hover { background: var(--accent-soft); }
+
+.mgmt-group #mgmt-delete-btn { color: #dc2626; }
 
 .mgmt-btn {
   min-width: 38px;
@@ -1328,4 +1352,17 @@
 .view-switch.exam-hidden,
 #recall-viewer.exam-active .exam-topbar {
   display: none !important;
+}
+
+.prompt-line {
+  margin-bottom: 30px;
+}
+
+.dir-btn {
+  margin: 20px 0 20px 0;
+}
+
+.modal-input {
+  border: 1px solid var(--border-color);
+  margin: 4px 0 14px;
 }
