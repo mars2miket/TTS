@@ -202,7 +202,9 @@
 
             <div class="view-row">
               <select id="view-select" class="ctrl-select"></select>
-              <div class="mgmt-group">
+              <button id="mgmt-menu-btn" class="mgmt-btn" type="button" aria-label="List actions"
+                aria-haspopup="true" aria-expanded="false">⋯</button>
+              <div class="mgmt-group" id="mgmt-group">
                 <button id="mgmt-new-btn" class="mgmt-btn" type="button" data-i18n-title="addList"
                   data-i18n="addList">Add</button>
                 <button id="mgmt-rename-btn" class="mgmt-btn" type="button" data-i18n-title="editList"
@@ -343,6 +345,7 @@
       <div class="modal-card">
         <h3 class="modal-title" id="confirm-modal-title">Confirm</h3>
         <p class="modal-message" id="confirm-modal-message">Are you sure?</p>
+        <input type="text" class="answer-input modal-input" id="confirm-modal-input" autocomplete="off" hidden>
         <div class="modal-actions">
           <button class="modal-btn" id="confirm-modal-cancel" type="button">Cancel</button>
           <button class="modal-btn confirm" id="confirm-modal-ok" type="button">Confirm</button>
