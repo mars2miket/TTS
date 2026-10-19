@@ -39,6 +39,26 @@
     if (mgmtRename) mgmtRename.addEventListener('click', function () { runMgmt('rename'); });
     if (mgmtDelete) mgmtDelete.addEventListener('click', function () { runMgmt('remove'); });
 
+    // Actions popup (⋯)
+    var menuBtn = document.getElementById('mgmt-menu-btn');
+    var menuGroup = document.getElementById('mgmt-group');
+    function closeMenu() {
+      if (!menuGroup) return;
+      menuGroup.classList.remove('open');
+      if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
+    }
+    if (menuBtn && menuGroup) {
+      menuBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var open = menuGroup.classList.toggle('open');
+        menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      menuGroup.addEventListener('click', closeMenu);
+      document.addEventListener('click', function (e) {
+        if (!menuGroup.contains(e.target)) closeMenu();
+      });
+    }
+
     // React to state changes
     window.subscribe(function (state, prev) {
       if (state.viewMode !== prev.viewMode) {
