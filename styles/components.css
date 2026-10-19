@@ -207,6 +207,14 @@
 .pb-btn.play-pause.is-playing .icon-play  { display: none; }
 .pb-btn.play-pause.is-playing .icon-pause { display: block; }
 
+.prompt-line {
+  margin-bottom: 30px;
+}
+
+.dir-btn {
+  margin: 20px 0 20px 0;
+}
+
 /* ==========================================================================
    TIMER
    ========================================================================== */
