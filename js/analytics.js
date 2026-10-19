@@ -10,6 +10,11 @@
     return (window.__i18n__ && window.__i18n__.t) ? window.__i18n__.t(k) : (fb || k);
   };
 
+  function getResultsText(notes) {
+    notes = notes || {};
+    return notes['__TEST_RESULTS__'] || notes['Test Results'] || '';
+  }
+
   function initAnalytics() {
     container = document.getElementById('analytics-workspace');
     if (!container) {
@@ -22,14 +27,14 @@
 window.subscribe(function (state, prev) {
   if (state.viewMode === 'analytics' &&
      (state.viewMode !== prev.viewMode || state.notes !== prev.notes || state.lang !== prev.lang)) {
-    renderDashboard((state.notes && state.notes['Test Results']) || '');
+    renderDashboard(getResultsText(state.notes));
   }
 });
 
 // Initial render if we booted into analytics
 var bootState = window.getState();
 if (bootState.viewMode === 'analytics') {
-  renderDashboard((bootState.notes && bootState.notes['Test Results']) || '');
+  renderDashboard(getResultsText(bootState.notes));
 }
   }
 
@@ -80,21 +85,26 @@ if (bootState.viewMode === 'analytics') {
         .filter(Boolean);
       if (!lines.length) return;
 
-      // Match: "... — 3 out of 5 correct." or "... — 3 / 5"
-      var header = lines[0];
-      var m = header.match(/(\d+)\s+(?:out\s+of|\/)\s+(\d+)/i);
+      // Score line: "3 out of 5", "3 trên 5" or "3 / 5". Take the last such line
+      // (works for old one-line headers and the new multi-line format).
+      var m = null;
+      lines.forEach(function (l) {
+        if (l.indexOf('→') !== -1) return;
+        var mm = l.match(/(\d+)\s+(?:out\s+of|trên|\/)\s+(\d+)/i);
+        if (mm) m = mm;
+      });
       if (!m) return;
 
       totalSessions++;
       totalCorrect   += parseInt(m[1], 10) || 0;
       totalQuestions += parseInt(m[2], 10) || 0;
 
-      for (var i = 1; i < lines.length; i++) {
-        if (lines[i].indexOf('→') !== -1) {
-          var key = lines[i].split('→')[0].trim();
+      lines.forEach(function (l) {
+        if (l.indexOf('→') !== -1) {
+          var key = l.split('→')[0].trim();
           if (key) missedCounts[key] = (missedCounts[key] || 0) + 1;
         }
-      }
+      });
     });
 
     var missedTracker = Object.keys(missedCounts)

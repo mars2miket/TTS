@@ -138,4 +138,18 @@ window.__LOCALES__.vi = {
   errFileEmpty: "Tệp trống.",
   errFileRead: "Không thể đọc tệp.",
 
+
+  // Results / notes
+  resultDate: "Ngày kiểm tra",
+  resultTitle: "Tên bài kiểm tra",
+  resultMode: "Chế độ",
+  resultScore: "Điểm",
+  resultIncorrect: "Câu trả lời sai",
+  examTotal: "Tổng",
+  testResultsNote: "Kết quả kiểm tra",
+  errNoteLocked: "Ghi chú này bị khóa, không thể sửa, đổi tên hoặc xóa.",
+  saveMissedBtn: "Lưu mục sai thành danh sách",
+  missedSuffix: "Mục sai",
+  savedMissedMsg: 'Đã tạo danh sách "{name}". Nhấn Bắt đầu kiểm tra để luyện tập.',
+
 };

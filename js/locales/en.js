@@ -136,4 +136,18 @@ window.__LOCALES__.en = {
   errFileEmpty: "That file is empty.",
   errFileRead: "Could not read that file.",
 
+
+  // Results / notes
+  resultDate: "Test Date",
+  resultTitle: "Test Title",
+  resultMode: "Test Mode",
+  resultScore: "Score",
+  resultIncorrect: "Incorrect Answers",
+  examTotal: "Total",
+  testResultsNote: "Test Results",
+  errNoteLocked: "This note is locked and cannot be edited, renamed, or deleted.",
+  saveMissedBtn: "Save missed as list",
+  missedSuffix: "Missed",
+  savedMissedMsg: 'Created list "{name}". Press Start Test to practice it.',
+
 };

@@ -5,6 +5,7 @@
 (function () {
   'use strict';
 
+  var RESULTS_KEY = '__TEST_RESULTS__';
   var noteArea, noteResizer, workspace;
 
   function t(key, fallback) {
@@ -38,6 +39,18 @@
     if (noteResizer) initResize();
 
     applyNoteMode();
+
+    // Migration: legacy 'Test Results' note -> locked internal key
+    var pre = window.getState();
+    if (pre.notes && ('Test Results' in pre.notes)) {
+      var migrated = Object.assign({}, pre.notes);
+      migrated[RESULTS_KEY] = (migrated[RESULTS_KEY] ? migrated[RESULTS_KEY] + '\n' : '') + migrated['Test Results'];
+      delete migrated['Test Results'];
+      window.setState({
+        notes: migrated,
+        activeNote: pre.activeNote === 'Test Results' ? RESULTS_KEY : pre.activeNote
+      });
+    }
 
     // Bootstrap: ensure at least one note exists on first load
     var st = window.getState();
@@ -102,6 +115,7 @@
     var inNotesView = state.viewMode === 'notes';
 
     if (noteArea) {
+      noteArea.readOnly = (state.activeNote === RESULTS_KEY);
       if (inNotesView && state.activeNote) {
         noteArea.value = state.notes[state.activeNote] || '';
       } else if (inNotesView) {
@@ -135,6 +149,8 @@
     var state = window.getState();
     if (!state.activeNote) { say(t('errSelectNote', 'Select a note first.')); return; }
 
+    if (state.activeNote === RESULTS_KEY) { say(t('errNoteLocked', 'This note is locked and cannot be edited, renamed, or deleted.')); return; }
+
     var current = state.activeNote;
     ask(t('renameNote', 'Rename note'), t('promptRenameNote', 'Rename note:'), current, function (raw) {
       var name = raw.trim();
@@ -154,6 +170,8 @@
   function onDeleteNote() {
     var state = window.getState();
     if (!state.activeNote) { say(t('errSelectNote', 'Select a note first.')); return; }
+
+    if (state.activeNote === RESULTS_KEY) { say(t('errNoteLocked', 'This note is locked and cannot be edited, renamed, or deleted.')); return; }
 
     var target = state.activeNote;
     var doDelete = function () {
@@ -177,7 +195,7 @@
   // ─── Input ───────────────────────────────────────────────────────────────
   function onNoteInput() {
     var state = window.getState();
-    if (!state.activeNote) return;
+    if (!state.activeNote || state.activeNote === RESULTS_KEY) return;
 
     var notes = Object.assign({}, state.notes);
     notes[state.activeNote] = noteArea.value;

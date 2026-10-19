@@ -12,10 +12,13 @@
     return (window.__i18n__ && window.__i18n__.t) ? window.__i18n__.t(key) : key;
   }
 
+  var RESULTS_KEY = '__TEST_RESULTS__';
+
   // ─── Module state ────────────────────────────────────────────────────────
   var deck = [];
   var currentItem = null;
   var mode = window.storage.get('examMode') || 'choice';
+  var modesUsed = [];
   var reverse = window.storage.get('examReverse') === true || window.storage.get('examReverse') === 'true';
   var counter = 0;
   var correct = 0;
@@ -88,6 +91,7 @@
     correct = 0;
     answered = 0;
     missed = [];
+    modesUsed = [mode];
     active = true;
     examComplete = false;
 
@@ -240,6 +244,7 @@
         if (mode === m.id) return;
         mode = m.id;
         window.storage.set('examMode', mode);
+        if (modesUsed.indexOf(mode) === -1) modesUsed.push(mode);
         renderQuestion();
       });
       row.appendChild(b);
@@ -440,7 +445,7 @@
   }
 
   function recordMiss() {
-    missed.push({ prompt: currentItem.prompt, answer: currentItem.answer });
+    missed.push({ prompt: currentItem.prompt, answer: currentItem.answer, rev: reverse });
   }
 
   // ─── Save partial ────────────────────────────────────────────────────────
@@ -449,7 +454,8 @@
       listName: listName,
       correct: correct,
       answered: answered,
-      missed: missed.slice()
+      missed: missed.slice(),
+      modes: modesUsed.slice()
     });
   }
 
@@ -462,7 +468,8 @@
       listName: listName,
       correct: correct,
       answered: answered,
-      missed: missed.slice()
+      missed: missed.slice(),
+      modes: modesUsed.slice()
     }, false);
 
     renderCompleteCard();
@@ -507,6 +514,14 @@
       card.appendChild(ul);
     }
 
+    if (missed.length > 0) {
+      var saveBtn = document.createElement('button');
+      saveBtn.className = 'answer-btn';
+      saveBtn.textContent = t('saveMissedBtn');
+      saveBtn.addEventListener('click', saveMissedAsList);
+      card.appendChild(saveBtn);
+    }
+
     var back = document.createElement('button');
     back.className = 'answer-btn primary';
     back.textContent = t('examBackToList');
@@ -521,24 +536,72 @@
   }
 
   // ─── Results note ────────────────────────────────────────────────────────
+  function modeLabel(id) {
+    if (id === 'choice') return t('examMultiChoice');
+    if (id === 'tf') return t('examTF');
+    return t('examFillBlank');
+  }
+
   function writeResultsToNote(result, isPartial) {
     var state = window.getState();
     var notes = Object.assign({}, state.notes);
-    var existing = notes['Test Results'] || '';
+    var existing = notes[RESULTS_KEY] || '';
 
-    var date = formatDate(new Date());
-    var line = date + ', ' + result.listName + ' — ' + result.correct + ' ' + t('examScoreOutOf') + ' ' + result.answered + ' ' + t('examTallyCorrect') + '.';
-    var body = line + '\n';
+    var pct = result.answered > 0 ? Math.round((result.correct / result.answered) * 100) : 0;
+    var modes = (result.modes && result.modes.length ? result.modes : [mode]).map(modeLabel).join(', ');
+
+    var body = t('resultDate') + ': ' + formatDate(new Date()) + '\n'
+             + t('resultTitle') + ': ' + result.listName + '\n'
+             + t('resultMode') + ': ' + modes + '\n'
+             + t('resultScore') + ': ' + result.correct + ' ' + t('examScoreOutOf') + ' '
+             + result.answered + ' ' + t('examTallyCorrect') + ' (' + pct + '%)\n';
 
     if (result.missed && result.missed.length > 0) {
+      body += t('resultIncorrect') + ':\n';
       result.missed.forEach(function (m) {
-        body += m.prompt + ' → ' + m.answer + '\n';
+        body += '\t' + m.prompt + ' → ' + m.answer + '\n';
       });
     }
     body += '---\n';
 
-    notes['Test Results'] = (existing ? existing + '\n' : '') + body;
+    notes[RESULTS_KEY] = (existing ? existing + '\n' : '') + body;
     window.setState({ notes: notes });
+  }
+
+  // ─── Save missed items as a new list ─────────────────────────────────────
+  function saveMissedAsList() {
+    if (!missed.length) return;
+    var state = window.getState();
+    var clean = function (v) { return String(v).replace(/[\t\n]+/g, ' '); };
+
+    var lines = missed.map(function (m) {
+      var a = m.rev ? m.answer : m.prompt;
+      var b = m.rev ? m.prompt : m.answer;
+      return clean(a) + '\t' + clean(b);
+    });
+
+    var base = listName + ' — ' + t('missedSuffix') + ' ' + formatDate(new Date());
+    var name = base, n = 2;
+    while (name in state.lists) { name = base + ' (' + (n++) + ')'; }
+
+    var lists = Object.assign({}, state.lists);
+    lists[state.activeList] = window.serializeGrid();
+    lists[name] = lines.join('\n');
+
+    window.setState({
+      lists: lists,
+      activeList: name,
+      rows: window.parseList(lists[name])
+    });
+
+    exitExam();
+    if (typeof window.__gridRerender__ === 'function') window.__gridRerender__();
+    if (typeof window.updateCharCount === 'function') window.updateCharCount();
+    if (typeof window.syncStartTestButton === 'function') window.syncStartTestButton();
+
+    if (typeof window.showAlert === 'function') {
+      window.showAlert(t('saveMissedBtn'), t('savedMissedMsg').replace('{name}', name));
+    }
   }
 
   function formatDate(d) {

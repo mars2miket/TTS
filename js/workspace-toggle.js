@@ -176,6 +176,8 @@
         
         if (name === 'Untitled Note' || name === '__DEFAULT_NOTE__') {
           op.textContent = (window.__i18n__ && window.__i18n__.t) ? window.__i18n__.t('dropdownNotes') : 'Untitled Note';
+        } else if (name === '__TEST_RESULTS__') {
+          op.textContent = (window.__i18n__ && window.__i18n__.t) ? window.__i18n__.t('testResultsNote') : 'Test Results';
         } else {
           op.textContent = name;
         }

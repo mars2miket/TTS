@@ -69,6 +69,9 @@
       if (key === '__DEFAULT_NOTE__' && viewMode === 'notes') {
         return (window.__i18n__ && window.__i18n__.t) ? window.__i18n__.t('dropdownNotes') : 'Untitled Note';
       }
+      if (key === '__TEST_RESULTS__' && viewMode === 'notes') {
+        return t('testResultsNote', 'Test Results');
+      }
       return key;
     };
 
