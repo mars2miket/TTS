@@ -7,6 +7,19 @@
 
   var noteArea, noteResizer, workspace;
 
+  function t(key, fallback) {
+    var v = (window.__i18n__ && window.__i18n__.t) ? window.__i18n__.t(key) : null;
+    return (v && v !== key) ? v : fallback;
+  }
+  function say(msg) {
+    if (typeof window.showAlert === 'function') window.showAlert('', msg); else alert(msg);
+  }
+  function ask(title, msg, def, cb) {
+    if (typeof window.showPrompt === 'function') { window.showPrompt(title, msg, def, cb); return; }
+    var raw = window.prompt(msg, def);
+    if (raw !== null) cb(raw);
+  }
+
   function initNotes() {
     noteArea    = document.getElementById('note-area');
     noteResizer = document.getElementById('note-resizer');
@@ -103,42 +116,44 @@
 
   // ─── New / Rename / Delete ───────────────────────────────────────────────
   function onNewNote() {
-    var raw = window.prompt('New note name:');
-    if (raw === null) return;
-    var name = raw.trim();
-    if (!name) return;
+    ask(t('newNote', 'New note'), t('promptNewNote', 'New note name:'), '', function (raw) {
+      var name = raw.trim();
+      if (!name) return;
 
-    var state = window.getState();
-    if (name in state.notes) { alert('A note with that name already exists.'); return; }
+      var state = window.getState();
+      if (name in state.notes) { say(t('errNoteExists', 'A note with that name already exists.')); return; }
 
-    var notes = Object.assign({}, state.notes);
-    notes[name] = '';
+      var notes = Object.assign({}, state.notes);
+      notes[name] = '';
 
-    window.setState({ notes: notes });
-    enterNote(name);
+      window.setState({ notes: notes });
+      enterNote(name);
+    });
   }
 
   function onRenameNote() {
     var state = window.getState();
-    if (!state.activeNote) { alert('Select a note first.'); return; }
+    if (!state.activeNote) { say(t('errSelectNote', 'Select a note first.')); return; }
 
-    var raw = window.prompt('Rename note:', state.activeNote);
-    if (raw === null) return;
-    var name = raw.trim();
-    if (!name || name === state.activeNote) return;
-    if (name in state.notes) { alert('A note with that name already exists.'); return; }
+    var current = state.activeNote;
+    ask(t('renameNote', 'Rename note'), t('promptRenameNote', 'Rename note:'), current, function (raw) {
+      var name = raw.trim();
+      var st = window.getState();
+      if (!name || name === current) return;
+      if (name in st.notes) { say(t('errNoteExists', 'A note with that name already exists.')); return; }
 
-    var notes = {};
-    Object.keys(state.notes).forEach(function (k) {
-      notes[k === state.activeNote ? name : k] = state.notes[k];
+      var notes = {};
+      Object.keys(st.notes).forEach(function (k) {
+        notes[k === current ? name : k] = st.notes[k];
+      });
+
+      window.setState({ notes: notes, activeNote: name });
     });
-
-    window.setState({ notes: notes, activeNote: name });
   }
 
   function onDeleteNote() {
     var state = window.getState();
-    if (!state.activeNote) { alert('Select a note first.'); return; }
+    if (!state.activeNote) { say(t('errSelectNote', 'Select a note first.')); return; }
 
     var target = state.activeNote;
     var doDelete = function () {
@@ -148,7 +163,12 @@
     };
 
     if (typeof window.showConfirm === 'function') {
-      window.showConfirm('Delete note', 'Delete "' + target + '"? This cannot be undone.', 'Delete', doDelete);
+      window.showConfirm(
+        t('deleteNote', 'Delete note'),
+        t('deleteConfirmMsg', 'Delete "{name}"? This cannot be undone.').replace('{name}', target),
+        t('deleteBtn', 'Delete'),
+        doDelete
+      );
     } else if (window.confirm('Delete "' + target + '"?')) {
       doDelete();
     }

@@ -15,6 +15,19 @@
 
   var exportBtn, importBtn, importInput, clearBtn;
 
+  function t(key, fallback) {
+    var v = (window.__i18n__ && window.__i18n__.t) ? window.__i18n__.t(key) : null;
+    return (v && v !== key) ? v : fallback;
+  }
+  function say(msg) {
+    if (typeof window.showAlert === 'function') window.showAlert('', msg); else alert(msg);
+  }
+  function ask(title, msg, def, cb) {
+    if (typeof window.showPrompt === 'function') { window.showPrompt(title, msg, def, cb); return; }
+    var raw = window.prompt(msg, def);
+    if (raw !== null) cb(raw);
+  }
+
   function initLists() {
     exportBtn   = document.getElementById('list-export-btn');
     importBtn   = document.getElementById('list-import-btn');
@@ -72,46 +85,49 @@
 
   // ─── New / Rename / Delete ───────────────────────────────────────────────
   function onNewList() {
-    var raw = window.prompt('New list name:');
-    if (raw === null) return;
-    var name = raw.trim();
-    if (!name) return;
+    ask(t('newList', 'New list'), t('promptNewList', 'New list name:'), '', function (raw) {
+      var name = raw.trim();
+      if (!name) return;
 
-    var state = window.getState();
-    if (name in state.lists) { alert('A list with that name already exists.'); return; }
+      var state = window.getState();
+      if (name in state.lists) { say(t('errListExists', 'A list with that name already exists.')); return; }
 
-    var lists = Object.assign({}, state.lists);
-    lists[state.activeList] = serializeGrid();
-    lists[name] = '';
+      var lists = Object.assign({}, state.lists);
+      lists[state.activeList] = serializeGrid();
+      lists[name] = '';
 
-    window.setState({
-      lists: lists,
-      activeList: name,
-      rows: [{ a: '', b: '' }]
+      window.setState({
+        lists: lists,
+        activeList: name,
+        rows: [{ a: '', b: '' }]
+      });
+      if (typeof window.__gridRerender__ === 'function') window.__gridRerender__();
     });
-    if (typeof window.__gridRerender__ === 'function') window.__gridRerender__();
   }
 
   function onRenameList() {
     var state = window.getState();
-    var raw = window.prompt('Rename list:', state.activeList);
-    if (raw === null) return;
-    var name = raw.trim();
-    if (!name || name === state.activeList) return;
-    if (name in state.lists) { alert('A list with that name already exists.'); return; }
+    var current = state.activeList;
+    var shown = (typeof window.getDisplayName === 'function') ? window.getDisplayName(current, 'lists') : current;
+    ask(t('renameList', 'Rename list'), t('promptRenameList', 'Rename list:'), shown, function (raw) {
+      var name = raw.trim();
+      var st = window.getState();
+      if (!name || name === current) return;
+      if (name in st.lists) { say(t('errListExists', 'A list with that name already exists.')); return; }
 
-    var lists = {};
-    Object.keys(state.lists).forEach(function (k) {
-      lists[k === state.activeList ? name : k] = state.lists[k];
+      var lists = {};
+      Object.keys(st.lists).forEach(function (k) {
+        lists[k === current ? name : k] = st.lists[k];
+      });
+
+      window.setState({ lists: lists, activeList: name });
     });
-
-    window.setState({ lists: lists, activeList: name });
   }
 
   function onDeleteList() {
     var state = window.getState();
     if (Object.keys(state.lists).length <= 1) {
-      alert('You need at least one list.');
+      say(t('errNeedOneList', 'You need at least one list.'));
       return;
     }
 
@@ -130,7 +146,12 @@
     };
 
     if (typeof window.showConfirm === 'function') {
-      window.showConfirm('Delete list', 'Delete "' + target + '"? This cannot be undone.', 'Delete', doDelete);
+      window.showConfirm(
+        t('deleteList', 'Delete list'),
+        t('deleteConfirmMsg', 'Delete "{name}"? This cannot be undone.').replace('{name}', target),
+        t('deleteBtn', 'Delete'),
+        doDelete
+      );
     } else if (window.confirm('Delete "' + target + '"?')) {
       doDelete();
     }
@@ -140,7 +161,7 @@
   function onExport() {
     var state = window.getState();
     var text = serializeGrid();
-    if (!text.trim()) { alert('This list is empty — nothing to export.'); return; }
+    if (!text.trim()) { say(t('errListEmpty', 'This list is empty — nothing to export.')); return; }
 
     var safeName = (state.activeList || 'list').replace(/[\\/:*?"<>|]/g, '_');
     var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
@@ -161,14 +182,14 @@
 
       var okExt = /\.(txt|csv|tsv|md)$/i.test(file.name);
     if (!okExt) {
-      alert('Only .txt, .tsv, .md and .csv files are allowed.');
+      say(t('errBadFileType', 'Only .txt, .tsv, .md and .csv files are allowed.'));
       importInput.value = '';
       return;
     }
 
     var MAX_BYTES = 500 * 1024;
     if (file.size > MAX_BYTES) {
-      alert('File too large. Max 500 KB.');
+      say(t('errFileTooLarge', 'File too large. Max 500 KB.'));
       importInput.value = '';
       return;
     }
@@ -176,7 +197,7 @@
     var reader = new FileReader();
     reader.onload = function (ev) {
       var raw = String(ev.target.result || '').replace(/\r\n/g, '\n');
-      if (!raw.trim()) { alert('That file is empty.'); importInput.value = ''; return; }
+      if (!raw.trim()) { say(t('errFileEmpty', 'That file is empty.')); importInput.value = ''; return; }
 
       var baseName = file.name.replace(/\.[^.]+$/, '').trim() || 'Imported';
       var name = baseName;
@@ -196,7 +217,7 @@
       if (typeof window.__gridRerender__ === 'function') window.__gridRerender__();
       importInput.value = '';
     };
-    reader.onerror = function () { alert('Could not read that file.'); importInput.value = ''; };
+    reader.onerror = function () { say(t('errFileRead', 'Could not read that file.')); importInput.value = ''; };
     reader.readAsText(file);
   }
 
@@ -228,7 +249,12 @@
     };
 
     if (typeof window.showConfirm === 'function') {
-      window.showConfirm('Clear content', 'Clear all content from this list? This cannot be undone.', 'Clear', doClear);
+      window.showConfirm(
+        t('clearContent', 'Clear content'),
+        t('clearConfirmMsg', 'Clear all content from this list? This cannot be undone.'),
+        t('clearBtn', 'Clear'),
+        doClear
+      );
     } else if (window.confirm('Clear all cells in the current list?')) {
       doClear();
     }
