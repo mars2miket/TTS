@@ -15,8 +15,8 @@
   // ─── Module state ────────────────────────────────────────────────────────
   var deck = [];
   var currentItem = null;
-  var mode = 'choice';
-  var reverse = false;
+  var mode = window.storage.get('examMode') || 'choice';
+  var reverse = window.storage.get('examReverse') === true || window.storage.get('examReverse') === 'true';
   var counter = 0;
   var correct = 0;
   var answered = 0;
@@ -144,12 +144,22 @@
   }
 
   // ─── Counter ─────────────────────────────────────────────────────────────
+  function totalQuestions() {
+    return (window.getState().rows || []).filter(function (r) {
+      return (r.a || '').trim() && (r.b || '').trim();
+    }).length;
+  }
+  function totalLabel() {
+    var v = t('examTotal');
+    return (v && v !== 'examTotal') ? v : 'Total';
+  }
+
   function updateCounter() {
     if (!counterStrip) return;
     counterStrip.textContent =
       t('examQuestionLabel') + ' ' + counter + ' · ' +
       correct + ' ' + t('examTallyCorrect') + ' / ' +
-      answered + ' ' + t('examTallyAnswered');
+      answered + ' ' + t('examTallyAnswered') + ' · ' + totalLabel() + ': ' + totalQuestions();
   }
 
   // ─── Render shell ────────────────────────────────────────────────────────
@@ -229,6 +239,7 @@
       b.addEventListener('click', function () {
         if (mode === m.id) return;
         mode = m.id;
+        window.storage.set('examMode', mode);
         renderQuestion();
       });
       row.appendChild(b);
@@ -243,6 +254,12 @@
     btn.textContent = reverse ? 'B → A' : 'A → B';
     btn.addEventListener('click', function () {
       reverse = !reverse;
+      window.storage.set('examReverse', reverse);
+      var nb = document.getElementById('exam-next-btn');
+      if (currentItem && nb && nb.disabled) {
+        currentItem = { prompt: currentItem.answer, answer: currentItem.prompt };
+        markServed(currentItem);
+      }
       rebuildRemainingDeck();
       renderQuestion();
     });
@@ -332,7 +349,6 @@
       if (seen[ans]) return;
       seen[ans] = true;
       wrongPool.push(ans);
-      if (nextBtn) nextBtn.disabled = false;
     });
 
     var isTrue = wrongPool.length === 0 || Math.random() < 0.5;
@@ -370,6 +386,7 @@
         markServed(currentItem);
         savePartial();
         showFeedback(feedback, isCorrect, isTrue ? t('examTrue') : t('examFalse'));
+        if (nextBtn) nextBtn.disabled = false;
       });
       body.appendChild(btn);
     });
@@ -404,6 +421,7 @@
       markServed(currentItem);
       savePartial();
       showFeedback(feedback, isCorrect, currentItem.answer);
+      if (nextBtn) nextBtn.disabled = false;
     });
 
     input.addEventListener('keydown', function (e) {
@@ -413,7 +431,6 @@
     body.appendChild(input);
     body.appendChild(submit);
     input.focus();
-    if (nextBtn) nextBtn.disabled = false;
   }
 
   function showFeedback(el, correct, expected) {
