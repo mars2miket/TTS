@@ -41,6 +41,7 @@ window.__LOCALES__.vi = {
   analyticsTopMissed: "5 mục sai nhiều nhất",
   analyticsEmpty: "Chưa có dữ liệu. Hoàn thành một bài kiểm tra để xem thống kê!",
   analyticsPerfect: "Điểm tuyệt đối! Không có mục nào bị sai.",
+  dashboard:"Bảng điều khiển",
 
   // Footer
   timer: "Đồng hồ",
@@ -151,5 +152,22 @@ window.__LOCALES__.vi = {
   saveMissedBtn: "Lưu mục sai thành danh sách",
   missedSuffix: "Mục sai",
   savedMissedMsg: 'Đã tạo danh sách "{name}". Nhấn Bắt đầu kiểm tra để luyện tập.',
+
+
+  // Skip / retest
+  examSkip: "Bỏ qua",
+  examRetest: "Kiểm tra lại",
+  examRetestBtn: "Kiểm tra lại mục sai",
+  resultSkipped: "Đã bỏ qua",
+
+
+  // Missed Questions / results screen / duplicates
+  missedListName: "Câu hỏi đã sai",
+  errMissedListLocked: "Không thể đổi tên danh sách Câu hỏi đã sai.",
+  examTestMissedBtn: "Kiểm tra câu hỏi đã sai",
+  tileCorrect: "Đúng",
+  tileIncorrect: "Sai",
+  resultPerfect: "Điểm tuyệt đối!",
+  dupWarning: "Trùng trong cột này",
 
 };

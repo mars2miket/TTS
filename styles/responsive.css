@@ -52,7 +52,9 @@
     flex-shrink: 0;
   }
 
-  .top-sticky-bar .brand { font-size: 17px; }
+  .top-sticky-bar .brand { 
+    font-size: 18px; 
+  }
 
   .app-layout-container {
     flex: 1;

@@ -41,6 +41,7 @@ window.__LOCALES__.en = {
   analyticsTopMissed: "Top 5 Missed Items",
   analyticsEmpty: "No test data found. Complete an exam to see analytics!",
   analyticsPerfect: "Perfect score! No missed items tracked.",
+  dashboard:"Dashboard",
 
   // Footer
   timer: "Timer",
@@ -149,5 +150,22 @@ window.__LOCALES__.en = {
   saveMissedBtn: "Save missed as list",
   missedSuffix: "Missed",
   savedMissedMsg: 'Created list "{name}". Press Start Test to practice it.',
+
+
+  // Skip / retest
+  examSkip: "Skip",
+  examRetest: "Retest",
+  examRetestBtn: "Retest missed",
+  resultSkipped: "Skipped",
+
+
+  // Missed Questions / results screen / duplicates
+  missedListName: "Missed Questions",
+  errMissedListLocked: "The Missed Questions list cannot be renamed.",
+  examTestMissedBtn: "Test Missed Questions",
+  tileCorrect: "Correct",
+  tileIncorrect: "Incorrect",
+  resultPerfect: "Perfect score!",
+  dupWarning: "Duplicate in this column",
 
 };

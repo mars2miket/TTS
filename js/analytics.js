@@ -80,16 +80,15 @@ if (bootState.viewMode === 'analytics') {
     var missedCounts = {};
 
     logs.forEach(function (log) {
-      var lines = log.trim().split('\n')
-        .map(function (l) { return l.trim(); })
-        .filter(Boolean);
+      var lines = log.split('\n')
+        .filter(function (l) { return l.trim(); });
       if (!lines.length) return;
 
       // Score line: "3 out of 5", "3 trên 5" or "3 / 5". Take the last such line
       // (works for old one-line headers and the new multi-line format).
       var m = null;
       lines.forEach(function (l) {
-        if (l.indexOf('→') !== -1) return;
+        if (l.indexOf('→') !== -1 || /^[ \t]/.test(l)) return;
         var mm = l.match(/(\d+)\s+(?:out\s+of|trên|\/)\s+(\d+)/i);
         if (mm) m = mm;
       });

@@ -157,6 +157,8 @@
         
         if (name === 'Untitled List' || name === '__DEFAULT_LIST__') {
           op.textContent = (window.__i18n__ && window.__i18n__.t) ? window.__i18n__.t('dropdownLists') : 'Untitled List';
+        } else if (name === '__MISSED_QUESTIONS__') {
+          op.textContent = (window.__i18n__ && window.__i18n__.t) ? window.__i18n__.t('missedListName') : 'Missed Questions';
         } else {
           op.textContent = name;
         }

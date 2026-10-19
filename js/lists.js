@@ -69,6 +69,9 @@
       if (key === '__DEFAULT_NOTE__' && viewMode === 'notes') {
         return (window.__i18n__ && window.__i18n__.t) ? window.__i18n__.t('dropdownNotes') : 'Untitled Note';
       }
+      if (key === '__MISSED_QUESTIONS__' && viewMode === 'lists') {
+        return t('missedListName', 'Missed Questions');
+      }
       if (key === '__TEST_RESULTS__' && viewMode === 'notes') {
         return t('testResultsNote', 'Test Results');
       }
@@ -110,6 +113,11 @@
 
   function onRenameList() {
     var state = window.getState();
+    if (state.activeList === '__MISSED_QUESTIONS__') {
+      say(t('errMissedListLocked', 'The Missed Questions list cannot be renamed.'));
+      return;
+    }
+
     var current = state.activeList;
     var shown = (typeof window.getDisplayName === 'function') ? window.getDisplayName(current, 'lists') : current;
     ask(t('renameList', 'Rename list'), t('promptRenameList', 'Rename list:'), shown, function (raw) {
@@ -151,7 +159,7 @@
     if (typeof window.showConfirm === 'function') {
       window.showConfirm(
         t('deleteList', 'Delete list'),
-        t('deleteConfirmMsg', 'Delete "{name}"? This cannot be undone.').replace('{name}', target),
+        t('deleteConfirmMsg', 'Delete "{name}"? This cannot be undone.').replace('{name}', (typeof window.getDisplayName === 'function') ? window.getDisplayName(target, 'lists') : target),
         t('deleteBtn', 'Delete'),
         doDelete
       );
@@ -166,7 +174,8 @@
     var text = serializeGrid();
     if (!text.trim()) { say(t('errListEmpty', 'This list is empty — nothing to export.')); return; }
 
-    var safeName = (state.activeList || 'list').replace(/[\\/:*?"<>|]/g, '_');
+    var shownName = (typeof window.getDisplayName === 'function') ? window.getDisplayName(state.activeList, 'lists') : state.activeList;
+    var safeName = (shownName || 'list').replace(/[\\/:*?"<>|]/g, '_');
     var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
     var url = URL.createObjectURL(blob);
 
