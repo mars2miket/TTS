@@ -13,7 +13,8 @@
   }
 
   .exam-body.mode-select > p,
-  .exam-body.mode-tf > p {
+  .exam-body.mode-tf > p,
+  .exam-body.mode-tf > .tf-statement {
     grid-column: 1 / -1;
     margin: 0;
   }
