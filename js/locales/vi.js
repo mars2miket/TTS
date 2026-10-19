@@ -73,6 +73,7 @@ window.__LOCALES__.vi = {
   confirmMessage: "Bạn có chắc không?",
   cancel: "Hủy",
   confirm: "Xác nhận",
+  delete:"Xóa bỏ 🗑",
 
   // Note buttons
   newNote: "Ghi chú mới",
@@ -114,5 +115,27 @@ window.__LOCALES__.vi = {
   femaleOnly: "Chỉ giọng nữ",
   maleOnly: "Chỉ giọng nam",
   searchVoices: "Tìm giọng nói...",
+
+
+  // Modal dialogs
+  ok: "OK",
+  noticeTitle: "Thông báo",
+  deleteBtn: "Xóa",
+  clearBtn: "Xóa hết",
+  deleteConfirmMsg: 'Xóa "{name}"? Hành động này không thể hoàn tác.',
+  clearConfirmMsg: "Xóa toàn bộ nội dung của danh sách này? Hành động này không thể hoàn tác.",
+  promptNewList: "Tên danh sách mới:",
+  promptRenameList: "Đổi tên danh sách:",
+  promptNewNote: "Tên ghi chú mới:",
+  promptRenameNote: "Đổi tên ghi chú:",
+  errListExists: "Đã có danh sách với tên này.",
+  errNoteExists: "Đã có ghi chú với tên này.",
+  errSelectNote: "Hãy chọn một ghi chú trước.",
+  errNeedOneList: "Bạn cần ít nhất một danh sách.",
+  errListEmpty: "Danh sách trống — không có gì để xuất.",
+  errBadFileType: "Chỉ chấp nhận tệp .txt, .tsv, .md và .csv.",
+  errFileTooLarge: "Tệp quá lớn. Tối đa 500 KB.",
+  errFileEmpty: "Tệp trống.",
+  errFileRead: "Không thể đọc tệp.",
 
 };

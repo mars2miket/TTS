@@ -73,6 +73,7 @@ window.__LOCALES__.en = {
   confirmMessage: "Are you sure?",
   cancel: "Cancel",
   confirm: "Confirm",
+  delete:"Delete 🗑",
 
   // Note buttons
   newNote: "New note",
@@ -112,5 +113,27 @@ window.__LOCALES__.en = {
   femaleOnly: "Female Only",
   maleOnly: "Male Only",
   searchVoices: "Search voices...",
+
+
+  // Modal dialogs
+  ok: "OK",
+  noticeTitle: "Notice",
+  deleteBtn: "Delete",
+  clearBtn: "Clear",
+  deleteConfirmMsg: 'Delete "{name}"? This cannot be undone.',
+  clearConfirmMsg: "Clear all content from this list? This cannot be undone.",
+  promptNewList: "New list name:",
+  promptRenameList: "Rename list:",
+  promptNewNote: "New note name:",
+  promptRenameNote: "Rename note:",
+  errListExists: "A list with that name already exists.",
+  errNoteExists: "A note with that name already exists.",
+  errSelectNote: "Select a note first.",
+  errNeedOneList: "You need at least one list.",
+  errListEmpty: "This list is empty — nothing to export.",
+  errBadFileType: "Only .txt, .tsv, .md and .csv files are allowed.",
+  errFileTooLarge: "File too large. Max 500 KB.",
+  errFileEmpty: "That file is empty.",
+  errFileRead: "Could not read that file.",
 
 };
