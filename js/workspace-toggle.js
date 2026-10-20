@@ -64,15 +64,20 @@
       if (state.viewMode !== prev.viewMode) {
         applyMode();
       }
+      
+      // FIX: Check if note keys changed (created/deleted/renamed) to ignore character typing shifts
+      var noteNamesChanged = Object.keys(state.notes || {}).join(',') !== Object.keys(prev.notes || {}).join(',');
+
       // Added state.lang check to force a dropdown update when language shifts
       if (state.lists !== prev.lists
        || state.activeList !== prev.activeList
-       || state.notes !== prev.notes
+       || noteNamesChanged
        || state.activeNote !== prev.activeNote
        || state.lang !== prev.lang) {
         refreshDropdown();
       }
     });
+
 
     // Initial render
     applyMode();
@@ -94,7 +99,8 @@
 
     // Sync noteActive flag and update state layout keys
     if (mode === 'notes') {
-      var lastNote = state.activeNote;
+      // FIX: Look at storage fallback configuration first to check for historical selections
+      var lastNote = state.activeNote || window.storage.get('activeNote', null);
       var noteExists = lastNote && lastNote in state.notes;
       var targetNote = noteExists ? lastNote : Object.keys(state.notes)[0];
       window.setState({
@@ -105,15 +111,17 @@
     } else if (mode === 'analytics') {
       window.setState({
         viewMode: 'analytics',
-        noteActive: false,
-        activeNote: null // Clears note selection so it doesn't try to show grid or notes
+        noteActive: false
+        // FIX: Removed activeNote: null reset to prevent wiping the memory state
       });
     } else {
       window.setState({
         viewMode: 'lists',
         noteActive: false
+        // FIX: Removed activeNote: null reset here as well
       });
     }
+
 
 
     applyMode();
@@ -225,8 +233,12 @@
       });
 
       var noteArea = document.getElementById('note-area');
-      if (noteArea) noteArea.value = state.notes[name] || '';
+      // FIX: Only overwrite the input DOM value if the active note itself has changed
+      if (noteArea && noteArea.value !== state.notes[name]) {
+        noteArea.value = state.notes[name] || '';
+      }
     }
+
   }
 
   window.initWorkspaceToggle = initWorkspaceToggle;

@@ -27,13 +27,19 @@
     workspace   = document.querySelector('.input-workspace');
 
     window.subscribe(function (state, prev) {
-      if (state.notes !== prev.notes
-       || state.activeNote !== prev.activeNote
-       || state.noteActive !== prev.noteActive
-       || state.viewMode !== prev.viewMode) {
+      // FIX: Check if note selection, layout view, or active flag changed
+      var noteIdentityChanged = state.activeNote !== prev.activeNote
+                             || state.noteActive !== prev.noteActive
+                             || state.viewMode !== prev.viewMode;
+
+      // FIX: Check if a structural note CRUD event happened (created/deleted/renamed)
+      var noteNamesChanged = Object.keys(state.notes || {}).join(',') !== Object.keys(prev.notes || {}).join(',');
+
+      if (noteIdentityChanged || noteNamesChanged) {
         applyNoteMode();
       }
     });
+
 
     if (noteArea)    noteArea.addEventListener('input', onNoteInput);
     if (noteResizer) initResize();
@@ -65,10 +71,20 @@
         activeNote: defaultNote,
         noteActive: false
       });
-    } else if (st.activeNote && !(st.activeNote in st.notes)) {
-      var first = Object.keys(st.notes)[0];
-      window.setState({ activeNote: first });
+    // FIX: Modeled after lists.js to handle first-run and refresh recoveries explicitly
+    } else if (!st.activeNote || !(st.activeNote in st.notes)) {
+      var firstNote = Object.keys(st.notes)[0];
+      window.setState({
+        activeNote: firstNote || null,
+        noteActive: !!firstNote
+      });
+      
+      // Force populate the text canvas DOM element immediately if we resolved a fallback note
+      if (firstNote && noteArea) {
+        noteArea.value = st.notes[firstNote] || '';
+      }
     }
+
 
     // Expose functions so the workspace mgmt buttons can call them
     window.noteActions = {

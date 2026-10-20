@@ -78,8 +78,11 @@
       activeList: safeActiveList,
       notes: notes,
       noteActive: !!noteWasActive,
-      activeNote: noteWasActive ? savedNoteName : null,
+      
+      // FIX: Keep the saved note if valid; if invalid but we are in note mode, grab the first note key.
+      activeNote: savedNoteName, 
       speed: speed,
+
       genderFilter: genderFilter,
       selectedVoiceName: voiceName,
       examMode: examMode,
@@ -112,7 +115,8 @@
     examMode:          'examMode',
     examReverse:       'examReverse',
     viewMode:          'viewMode',
-    accordionState:    'accordionState'
+    accordionState:    'accordionState',
+    activeNote:        'activeNote'
   };
 
   subscribe(function (state, prev) {
