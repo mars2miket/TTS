@@ -655,6 +655,10 @@ button:hover {
   display: none;
 }
 
+#spreadsheet-container {
+  overflow-x: hidden;
+}
+
 .exam-topbar {
   display: flex;
   align-items: flex-end;
@@ -1513,17 +1517,15 @@ input:focus {
   font-style: italic;
 }
 
-/**
- * Workspace Visibility Rules
- * Toggles the main display containers based on the active state view mode attribute.
- */
-
-/* Grid hugs its rows; footer stays pinned to the bottom of the workspace */
-#grid-workspace { flex-direction: column; min-height: 0; }
+/* Workspace has a bounded height; grid hugs its rows, scrolls when long;
+   footer stays pinned at the bottom */
+#grid-workspace { flex: 1 1 0 !important; flex-direction: column; min-height: 0 !important; overflow: hidden; }
 #spreadsheet-container.spreadsheet-grid {
   flex: 0 1 auto !important;
   height: auto !important;
-  min-height: 0;
+  max-height: none !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
   align-content: start;
 }
 #grid-workspace .grid-footer { margin-top: auto; position: sticky; bottom: 0; flex: 0 0 auto; }
