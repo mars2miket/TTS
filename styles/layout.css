@@ -147,17 +147,3 @@
   padding: 6px 8px;
   border-radius: 6px;
 }
-
-.grid-footer {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex-shrink: 0;
-  position: sticky;
-  bottom: 0;
-  background: var(--bg-app);
-  padding-top: 10px;
-  padding-bottom: 4px;
-  margin-top: auto;
-  z-index: 5;
-}

@@ -577,20 +577,20 @@ button:hover {
    GRID FOOTER + START TEST
    ========================================================================== */
 .grid-footer {
-  display: flex;
-  flex-direction: row;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-shrink: 0;
-  position: sticky;
-  bottom: 0;
   background: var(--bg-app);
-  padding: 16px;
-  z-index: 5;
   border: 1px solid rgba(99, 102, 241, 0.15);
   border-radius: 8px;
+  bottom: 0;
+  display: flex;
+  flex-direction: row;
+  flex-shrink: 0;
+  gap: 12px;
+  justify-content: space-between;
   margin-top: 14px;
+  padding: 16px;
+  position: sticky;
+  z-index: 5;
 }
 
 .grid-helper {
