@@ -133,6 +133,7 @@
   safeInit('initNav');
   safeInit('initGrid');
   safeInit('initLists');
+  safeInit('initQbank');
   safeInit('initNotes');
   safeInit('initSpeech');
   safeInit('initExam');

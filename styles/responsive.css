@@ -40,6 +40,11 @@
 
   .acc-section[data-acc="controls"] { display: none; }
 
+  #analytics-workspace {
+    overflow-x: hidden;
+    max-height: 80vh;
+  }
+
   .top-sticky-bar {
     height: 48px;
     padding: 0 14px;
@@ -79,7 +84,11 @@
     overflow-y: visible;
   }
 
-  .input-workspace { padding: 12px; }
+  .input-workspace {
+    padding: 12px;
+    overflow: hidden;
+    min-height: 0;
+  }
 
   .hint-card {
     max-height: 30vh;
@@ -88,11 +97,13 @@
     margin-bottom: 12px;
   }
 
-  .spreadsheet-grid {
-    flex: 1 1 auto;
-    min-height: 0;
+  .spreadsheet-grid,
+  #spreadsheet-container.spreadsheet-grid {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
     max-height: none;
-    overflow-y: auto;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
   }
 
   .header-cell {
@@ -112,7 +123,16 @@
 
   #note-area { width: 100%; min-width: 0; }
 
-  #recall-viewer { flex: 1 1 auto; min-height: 0; max-height: none; }
+  #recall-viewer.exam-active {
+    flex: 1 1 0;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+  }
+  
 
   .mobile-playback-bar {
     display: flex !important;

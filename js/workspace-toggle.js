@@ -5,11 +5,12 @@
 (function () {
   'use strict';
 
-  var toggle, viewSelect;
+  var toggle, viewSelect, dashBtn;
 
   function initWorkspaceToggle() {
     toggle     = document.getElementById('seg-toggle');
     viewSelect = document.getElementById('view-select');
+    dashBtn    = document.getElementById('dashboard-toggle');
     if (!toggle || !viewSelect) return;
 
     // Wire toggle buttons
@@ -18,6 +19,12 @@
         setMode(btn.dataset.mode);
       });
     });
+
+    if (dashBtn) {
+      dashBtn.addEventListener('click', function () {
+        setMode('analytics');
+      });
+    }
 
     // Wire the dropdown
     viewSelect.addEventListener('change', onDropdownChange);
@@ -134,6 +141,7 @@
     toggle.querySelectorAll('.seg-btn').forEach(function (b) {
       b.classList.toggle('active', b.dataset.mode === mode);
     });
+    if (dashBtn) dashBtn.classList.toggle('active', mode === 'analytics');
 
 
     // Refresh dropdown options only if we are browsing structured content tiers

@@ -169,4 +169,20 @@ window.__LOCALES__.en = {
   resultPerfect: "Perfect score!",
   dupWarning: "Duplicate in this column",
 
+  // Question Bank
+  qbankBtn: "Question Bank",
+  qbankTitle: "Question Bank",
+  qbankSearch: "Search categories...",
+  qbankLeft: "{left} of {total} left",
+  qbankHowMany: "Questions",
+  qbankUpTo: "Up to {n} available",
+  qbankAllUsed: "All questions used. Reset to start over.",
+  qbankReset: "Reset category",
+  qbankResetConfirm: 'Reset "{name}"? Used questions can appear again.',
+  qbankImport: "Create list",
+  qbankLoading: "Loading...",
+  qbankLoadErr: "Could not load the question bank.",
+  qbankNone: "No categories found.",
+  qbankSelect: "Select a category.",
+
 };

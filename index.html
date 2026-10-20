@@ -6,12 +6,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>RecallRx</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6366F1">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
 
   <link rel="stylesheet" href="styles/base.css">
   <link rel="stylesheet" href="styles/layout.css">
   <link rel="stylesheet" href="styles/components.css">
   <link rel="stylesheet" href="styles/responsive.css">
-  <!--link rel="stylesheet" href="styles/fixes.css"-->
+  <link rel="stylesheet" href="styles/qbank.css">
 </head>
 
 <body>
@@ -43,6 +46,15 @@
         </button>
 
         <span class="brand-name">RecallRx</span>
+
+        <button id="dashboard-toggle" class="icon-btn" type="button" data-i18n-title="dashboard" aria-label="Dashboard">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+          </svg>
+        </button>
 
         <button id="lang-toggle" class="icon-btn" type="button" aria-label="Toggle language">
           <span id="lang-toggle-label" class="lang-label">EN</span>
@@ -196,7 +208,6 @@
               <div class="seg-toggle" id="seg-toggle">
                 <button class="seg-btn active" data-mode="lists" type="button" data-i18n="lists">Lists</button>
                 <button class="seg-btn" data-mode="notes" type="button" data-i18n="notes">Notes</button>
-                <button class="seg-btn" data-mode="analytics" type="button" data-i18n="dashboard">Dashboard</button>
               </div>
             </div>
 
@@ -207,6 +218,7 @@
               <button id="hint-show-btn" class="mgmt-btn" type="button" data-i18n-title="showHint"
                 aria-label="Show help">?</button>
               <div class="mgmt-group" id="mgmt-group">
+                <button id="qbank-open-btn" class="mgmt-btn" type="button" data-i18n="qbankBtn">Question Bank</button>
                 <button id="mgmt-new-btn" class="mgmt-btn" type="button" data-i18n-title="addList"
                   data-i18n="addList">New</button>
                 <button id="mgmt-rename-btn" class="mgmt-btn" type="button" data-i18n-title="editList"
@@ -382,6 +394,7 @@
   <!-- Step 5: modal + lists + notes -->
   <script src="js/modal.js"></script>
   <script src="js/lists.js"></script>
+  <script src="js/qbank.js"></script>
   <script src="js/notes.js"></script>
 
   <!-- Step 6: speech -->
@@ -394,6 +407,12 @@
 
   <!-- Bootstrap last -->
   <script src="js/main.js"></script>
+
+  <script>
+    if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+      window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js'); });
+    }
+  </script>
 
 </body>
 

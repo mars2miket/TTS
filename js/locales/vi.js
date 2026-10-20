@@ -171,4 +171,20 @@ window.__LOCALES__.vi = {
   resultPerfect: "Điểm tuyệt đối!",
   dupWarning: "Trùng trong cột này",
 
+  // Question Bank
+  qbankBtn: "Ngân hàng câu hỏi",
+  qbankTitle: "Ngân hàng câu hỏi",
+  qbankSearch: "Tìm danh mục...",
+  qbankLeft: "còn {left}/{total}",
+  qbankHowMany: "Số câu hỏi",
+  qbankUpTo: "Tối đa {n} câu",
+  qbankAllUsed: "Đã dùng hết câu hỏi. Đặt lại để bắt đầu lại.",
+  qbankReset: "Đặt lại danh mục",
+  qbankResetConfirm: 'Đặt lại "{name}"? Các câu hỏi đã dùng có thể xuất hiện lại.',
+  qbankImport: "Tạo danh sách",
+  qbankLoading: "Đang tải...",
+  qbankLoadErr: "Không thể tải ngân hàng câu hỏi.",
+  qbankNone: "Không tìm thấy danh mục.",
+  qbankSelect: "Chọn một danh mục.",
+
 };

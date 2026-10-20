@@ -53,7 +53,7 @@
 
     // Exit exam if the user switches away from Lists view
     window.subscribe(function (state, prev) {
-      if (state.viewMode !== prev.viewMode && state.viewMode === 'notes' && active) {
+      if (state.viewMode !== prev.viewMode && state.viewMode !== 'lists' && active) {
         exitExam();
       }
     });
@@ -64,7 +64,7 @@
           window.storage.remove('examPartial');
           var sess = window.storage.get('examSession');
           var st0 = window.getState();
-          if (sess && Array.isArray(sess.deck) && sess.activeList === st0.activeList) {
+          if (sess && Array.isArray(sess.deck) && (sess.examComplete || sess.activeList === st0.activeList)) {
             resumeExam(sess);
           } else {
             startExam();
@@ -186,7 +186,7 @@
 
   // ─── Resume after refresh ────────────────────────────────────────────────
   function persistSession(answeredCurrent) {
-    if (!active) return;
+    if (!active && !examComplete) return;
     window.storage.set('examSession', {
       activeList: window.getState().activeList,
       listName: listName,
@@ -200,6 +200,7 @@
       totalCount: totalCount,
       modesUsed: modesUsed,
       served: servedItems,
+      examComplete: !!examComplete,
       answeredCurrent: !!answeredCurrent
     });
   }
@@ -217,13 +218,18 @@
     if (modesUsed.indexOf(mode) === -1) modesUsed.push(mode);
     servedItems = s.served || {};
     listName = s.listName || listName;
-    active = true;
-    examComplete = false;
+    examComplete = !!s.examComplete;
+    active = !examComplete;
 
     enterExamUI();
     window.storage.set('mode', 'exam');
     refreshPicker();
     renderExamShell();
+
+    if (examComplete) {
+      renderCompleteCard();
+      return;
+    }
 
     if (s.answeredCurrent || !currentItem) {
       nextQuestion();
@@ -588,9 +594,9 @@
 
     renderCompleteCard();
 
-    window.storage.set('mode', 'grid');
+    window.storage.set('mode', 'exam');
     window.storage.remove('examPartial');
-    window.storage.remove('examSession');
+    persistSession(true);
   }
 
   function renderCompleteCard() {

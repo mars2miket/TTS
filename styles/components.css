@@ -41,6 +41,11 @@ button:hover {
   outline-offset: 2px;
 }
 
+#dashboard-toggle.active {
+  border-color: #6366F1;
+  color: #6366F1;
+}
+
 /* ==========================================================================
    ACCORDION
    ========================================================================== */
@@ -393,7 +398,7 @@ button:hover {
 .hint-card h4 {
   margin: 0 0 6px 0;
   font-size: 14px;
-  color: var(--accent-light);
+  color: #6366F1;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -581,7 +586,7 @@ button:hover {
 .grid-footer {
   align-items: center;
   background: var(--bg-app);
-  border: 1px solid rgba(99, 102, 241, 0.15);
+  /* border: 1px solid rgba(99, 102, 241, 0.15); */
   border-radius: 8px;
   bottom: 0;
   display: flex;

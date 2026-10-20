@@ -1,0 +1,51 @@
+/* Question Bank picker */
+#qbank-modal { z-index: 9000; }  /* keep the confirm dialog above it */
+
+.qbank-card {
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: calc(100dvh - 40px);
+}
+.qbank-card .modal-title { margin: 0; }
+
+.qbank-list {
+  overflow-y: auto;
+  min-height: 120px;
+  max-height: 40dvh;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-surface-2);
+}
+
+.qbank-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 14px;
+  text-align: left;
+}
+.qbank-item:last-child { border-bottom: none; }
+.qbank-item:hover { background: var(--accent-soft); }
+.qbank-item.selected {
+  background: var(--accent-soft);
+  box-shadow: inset 3px 0 0 var(--accent-light);
+  font-weight: 600;
+}
+.qbank-item-count { color: var(--text-muted); font-size: 12px; white-space: nowrap; }
+
+.qbank-status { padding: 4px 2px; font-size: 13px; color: var(--text-muted); min-height: 1.2em; }
+.qbank-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.qbank-row input[type="number"] { width: 90px; }
+.qbank-hint { font-size: 12px; color: var(--text-muted); }
+.qbank-card .modal-actions { flex-wrap: wrap; }
+.modal-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Only offered for Lists */
+[data-view-mode="notes"] #qbank-open-btn { display: none; }
