@@ -49,9 +49,9 @@
 }
 
 [data-theme="dark"] {
-  --bg-app:        #0f172a;
+  --bg-app:        #0B0F19;
   --bg-surface:    #1e293b;
-  --bg-surface-2:  #172033;
+  --bg-surface-2:  #111827;
   --bg-elevated:   #334155;
 
   --text-primary:  #e2e8f0;

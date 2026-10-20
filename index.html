@@ -76,6 +76,7 @@
                 <span data-i18n="voices">Voices</span>
                 <span class="acc-chevron">▸</span>
               </div>
+
               <div class="acc-body">
                 <div class="acc-body-inner">
                   <select id="gender-filter" class="ctrl-select">
@@ -100,12 +101,13 @@
                 </div>
                 <div class="acc-body">
                   <div class="acc-body-inner">
-                    <p class="ctrl-label">
-                      <span data-i18n="speed">Speed</span>:
-                      <strong id="speed-value" class="speed-value">0.75x</strong>
-                    </p>
-                    <input type="range" id="speed-slider" min="0.25" max="2" step="0.25" value="0.75" class="slider">
-
+                    <div class="slider-container">
+                      <p class="ctrl-label">
+                        <span data-i18n="speed">Speed</span>:
+                        <strong id="speed-value" class="speed-value">0.75x</strong>
+                      </p>
+                      <input type="range" id="speed-slider" min="0.25" max="2" step="0.25" value="0.75" class="slider">
+                    </div>
                     <div class="playback-row">
                       <button id="rewind-btn" class="pb-btn" title="Rewind" aria-label="Rewind">
                         <svg viewBox="0 0 24 24">
@@ -144,22 +146,22 @@
                         </svg>
                       </button>
                     </div>
+                    <!--here-->
+                    <div class="nested-timer-box"><label class="timer-label">Stop Timer</label>
+                      <div class="ctrl-row">
+                        <div id="timer-display" class="timer-display">00:00.0</div>
+                        <button id="timer-reset-btn" class="ctrl-btn half" data-i18n="resetTimer">Reset</button>
+                      </div>
+                      <div class="metrics-row">
+                        <span><span data-i18n="chars">Chars</span>: <strong id="char-count">0</strong></span>
+                        <span><span data-i18n="est">Est</span>: <strong id="time-estimate">0m 0s</strong></span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div class="footer-block">
-                <div class="footer-label" data-i18n="timer">Timer</div>
-                <div class="ctrl-row">
-                  <div id="timer-display" class="timer-display">00:00.0</div>
-                  <button id="timer-reset-btn" class="ctrl-btn half" data-i18n="resetTimer">Reset</button>
-                </div>
-              </div>
 
-              <div class="metrics-row">
-                <span><span data-i18n="chars">Chars</span>: <strong id="char-count">0</strong></span>
-                <span><span data-i18n="est">Est</span>: <strong id="time-estimate">0m 0s</strong></span>
-              </div>
             </div>
 
           </div>
@@ -195,25 +197,25 @@
                 <button class="seg-btn" data-mode="notes" type="button" data-i18n="notes">Notes</button>
                 <button class="seg-btn" data-mode="analytics" type="button" data-i18n="dashboard">Dashboard</button>
               </div>
-
-              <button id="hint-show-btn" class="mgmt-btn" type="button" data-i18n-title="showHint"
-                aria-label="Show help">?</button>
             </div>
 
             <div class="view-row">
               <select id="view-select" class="ctrl-select"></select>
-              <button id="mgmt-menu-btn" class="mgmt-btn" type="button" aria-label="List actions"
-                aria-haspopup="true" aria-expanded="false">⋯</button>
+              <button id="mgmt-menu-btn" class="mgmt-btn" type="button" aria-label="List actions" aria-haspopup="true"
+                aria-expanded="false">⋯</button>
+              <button id="hint-show-btn" class="mgmt-btn" type="button" data-i18n-title="showHint"
+                aria-label="Show help">?</button>
               <div class="mgmt-group" id="mgmt-group">
                 <button id="mgmt-new-btn" class="mgmt-btn" type="button" data-i18n-title="addList"
-                  data-i18n="addList">Add</button>
+                  data-i18n="addList">New</button>
                 <button id="mgmt-rename-btn" class="mgmt-btn" type="button" data-i18n-title="editList"
                   data-i18n="editList">Edit</button>
                 <button id="list-export-btn" class="mgmt-btn" type="button" data-i18n-title="expList"
                   data-i18n="expList">Exp</button>
                 <button id="list-import-btn" class="mgmt-btn" type="button" data-i18n-title="impList"
                   data-i18n="impList">Imp</button>
-                <button id="mgmt-delete-btn" class="mgmt-btn" type="button" data-i18n-title="deleteList">🗑</button>
+                <button id="mgmt-delete-btn" class="mgmt-btn" type="button" data-i18n-title="deleteList"
+                  data-i18n="delete">Delete 🗑</button>
               </div>
             </div>
           </div>
@@ -238,7 +240,7 @@
             </div>
 
             <div class="grid-footer">
-              <div class="grid-helper" data-i18n="startTestHelper">When you're ready, test your memory.</div>
+              <div class="grid-helper" data-i18n="startTestHelper">Ready to test?</div>
               <button id="start-test-btn" class="start-test-btn" type="button" data-i18n="startTestBtn" disabled>
                 Start Test
               </button>
@@ -326,9 +328,11 @@
     </div>
 
     <!-- Mobile popups -->
+
     <div class="mobile-popup" id="m-menu-popup">
       <button class="mobile-popup-item" id="m-speed-open-btn" data-i18n="speed">Speed</button>
     </div>
+
 
     <div class="mobile-popup" id="m-speed-popup">
       <button class="mobile-popup-item speed-opt" data-speed="2">2.0x</button>
@@ -339,6 +343,7 @@
       <button class="mobile-popup-item speed-opt" data-speed="0.5">0.5x</button>
       <button class="mobile-popup-item speed-opt" data-speed="0.25">0.25x</button>
     </div>
+
 
     <!-- ══════════════════ CONFIRM MODAL ══════════════════ -->
     <div class="modal-overlay" id="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
