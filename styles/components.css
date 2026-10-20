@@ -1,3 +1,13 @@
+button:hover {
+  border: 1px solid #4f46e5;
+  color: #4f46e5;
+}
+
+.seg-btn:hover, #start-test-btn:hover {
+  border:none;
+  color: white;
+}
+
 /* ==========================================================================
    ICON BUTTONS (top bar)
    ========================================================================== */
@@ -537,7 +547,7 @@
   border-radius: 4px;
   font-size: 20px;
   font-weight: 600;
-  padding: 2px 8px;
+  padding: 2px 12px;
   min-height: 32px;
   transition: background .15s;
 }
@@ -1102,7 +1112,7 @@
 .seg-toggle {
   display: flex;
   background: transparent;
-  padding: 0;
+  padding: 3px;
   gap: 4px;
 }
 
@@ -1421,6 +1431,7 @@ input:focus {
   width: 100%;
   margin-top: 1.5rem;
   box-sizing: border-box;
+  overflow: auto;
 }
 
 /* 2-Column Responsive Flex Grid */
