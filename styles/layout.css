@@ -50,14 +50,19 @@
    MASTER LAYOUT (sidebar + workspace)
    ========================================================================== */
 .app-layout-container {
+  display: flex;
+  flex: 1;
+  min-height: 0; /* Crucial for Firefox overflow containment */
   width: 100%;
+  overflow: hidden;
   position: relative;
 }
 
 /* Sidebar wrapper */
 .sidebar-wrapper {
   display: flex;
-  flex: 1;
+  flex-direction: column;
+  height: 100%;
   min-width: 0;
   position: relative;
 }
@@ -67,6 +72,7 @@
    ========================================================================== */
 .controls-sidebar {
   width: var(--sidebar-width);
+  height: 100%;
   flex-shrink: 0;
   background-color: var(--bg-surface-2);
   border-right: 1px solid var(--border-color);
@@ -87,12 +93,8 @@
 .sidebar-scrollable-content {
   display: flex;
   flex-direction: column;
-
-  /* CHANGE: Use flex-grow instead of height: 100% to keep Firefox contained */
-  flex: 1 1 0%; 
-  min-height: 0; 
-
-  height: 100%;
+  flex: 1 1 0%; /* Fills parent space cleanly */
+  min-height: 0; /* Keeps Firefox layout calculation container constrained */
   padding: 12px;
   gap: 4px;
   overflow-y: auto;
@@ -104,9 +106,14 @@
    WORKSPACE
    ========================================================================== */
 .input-workspace {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
+  min-height: 0; /* Prevents textareas and grids from pushing viewport boundaries out in Firefox */
   gap: 12px;
   padding: 20px 120px;
+  overflow: hidden;
   box-sizing: border-box;
 }
 
@@ -114,11 +121,12 @@
    SIDEBAR FOOTER
    ========================================================================== */
 .sidebar-footer {
-  margin-top: auto;
+  margin-top: auto; /* Automatically pins player controls to the bottom layout block */
   padding-top: 4px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  width: 100%;
 }
 
 .footer-block {
