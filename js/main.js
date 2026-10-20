@@ -52,7 +52,6 @@
     var examMode     = storage.get('examMode', 'choice');
     var examReverse  = storage.get('examReverse', false);
     var viewMode     = storage.get('viewMode', 'lists');
-    var accordionState = storage.get('accordionState', {});
 
     // Ensure at least one empty row exists
     var safeRows = Array.isArray(rows) && rows.length > 0
@@ -68,7 +67,7 @@
 
     var savedMode     = storage.get('mode', 'grid');
     var savedNoteName = storage.get('activeNote', null);
-    var noteWasActive = savedMode === 'note' && savedNoteName && savedNoteName in notes;
+    var noteWasActive = !!(savedNoteName && savedNoteName in notes);
 
     setState({
       theme: theme,
@@ -77,18 +76,14 @@
       lists: safeLists,
       activeList: safeActiveList,
       notes: notes,
-      noteActive: !!noteWasActive,
-      
-      // FIX: Keep the saved note if valid; if invalid but we are in note mode, grab the first note key.
-      activeNote: savedNoteName, 
+      noteActive: noteWasActive && viewMode === 'notes',
+      activeNote: noteWasActive ? savedNoteName : null,
       speed: speed,
-
       genderFilter: genderFilter,
       selectedVoiceName: voiceName,
       examMode: examMode,
       examReverse: examReverse,
-      viewMode: viewMode,
-      accordionState: accordionState
+      viewMode: viewMode
     });
 
     // Apply theme + lang to the DOM immediately (avoid flash)
@@ -109,14 +104,13 @@
     lists:             'lists',
     activeList:        'activeList',
     notes:             'notes',
+    activeNote:        'activeNote',
     speed:             'speed',
     genderFilter:      'genderFilter',
     selectedVoiceName: 'voiceName',
     examMode:          'examMode',
     examReverse:       'examReverse',
-    viewMode:          'viewMode',
-    accordionState:    'accordionState',
-    activeNote:        'activeNote'
+    viewMode:          'viewMode'
   };
 
   subscribe(function (state, prev) {

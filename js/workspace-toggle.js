@@ -64,20 +64,15 @@
       if (state.viewMode !== prev.viewMode) {
         applyMode();
       }
-      
-      // FIX: Check if note keys changed (created/deleted/renamed) to ignore character typing shifts
-      var noteNamesChanged = Object.keys(state.notes || {}).join(',') !== Object.keys(prev.notes || {}).join(',');
-
       // Added state.lang check to force a dropdown update when language shifts
       if (state.lists !== prev.lists
        || state.activeList !== prev.activeList
-       || noteNamesChanged
+       || state.notes !== prev.notes
        || state.activeNote !== prev.activeNote
        || state.lang !== prev.lang) {
         refreshDropdown();
       }
     });
-
 
     // Initial render
     applyMode();
@@ -87,6 +82,11 @@
   function setMode(mode) {
     var state = window.getState();
     if (state.viewMode === mode) return;
+
+    if (mode === 'analytics' && typeof window.stopSpeech === 'function' &&
+        (state.isSpeaking || state.isPaused)) {
+      window.stopSpeech();
+    }
 
     // Save the current grid into its list before leaving Lists mode
     if (state.viewMode === 'lists' && typeof window.serializeGrid === 'function') {
@@ -99,8 +99,7 @@
 
     // Sync noteActive flag and update state layout keys
     if (mode === 'notes') {
-      // FIX: Look at storage fallback configuration first to check for historical selections
-      var lastNote = state.activeNote || window.storage.get('activeNote', null);
+      var lastNote = state.activeNote;
       var noteExists = lastNote && lastNote in state.notes;
       var targetNote = noteExists ? lastNote : Object.keys(state.notes)[0];
       window.setState({
@@ -112,16 +111,13 @@
       window.setState({
         viewMode: 'analytics',
         noteActive: false
-        // FIX: Removed activeNote: null reset to prevent wiping the memory state
       });
     } else {
       window.setState({
         viewMode: 'lists',
         noteActive: false
-        // FIX: Removed activeNote: null reset here as well
       });
     }
-
 
 
     applyMode();
@@ -233,12 +229,8 @@
       });
 
       var noteArea = document.getElementById('note-area');
-      // FIX: Only overwrite the input DOM value if the active note itself has changed
-      if (noteArea && noteArea.value !== state.notes[name]) {
-        noteArea.value = state.notes[name] || '';
-      }
+      if (noteArea) noteArea.value = state.notes[name] || '';
     }
-
   }
 
   window.initWorkspaceToggle = initWorkspaceToggle;

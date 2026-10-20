@@ -71,7 +71,6 @@
       'whMode':                   'mode',
       'recallrx-theme':           'theme',
       'recallrx-lang':            'lang',
-      'recallrx-accordion':       'accordionState',
       'recallrx-hint-dismissed':  'hintDismissed',
       'recallrx-onboarded':       'onboarded',
       'savedVoiceNameString':     'voiceName',

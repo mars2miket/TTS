@@ -16,7 +16,6 @@
     initTheme();
     initLang();
     initAccordion();
-    initMobileViewport();
   }
 
   // ─── Sidebar ─────────────────────────────────────────────────────────────
@@ -102,79 +101,28 @@
     });
   }
 
-  // ─── Accordion (single-open with persistence) ─────────────────────────────
+  // ─── Accordion (single-open) ─────────────────────────────────────────────
   function initAccordion() {
     var sections = document.querySelectorAll('.acc-section');
     if (!sections.length) return;
 
-    // 1. RESTORE STATE FROM REFRESH
-    // Pull the saved accordion dictionary or default to an empty object
-    var savedAccordionState = window.getState().accordionState || {};
+    var saved = window.storage.get('accOpen', {}) || {};
 
-    sections.forEach(function (section, index) {
-      // Ensure each section has an identifier (use ID if present, otherwise fall back to index)
-      var sectionId = section.id || 'acc-sec-' + index; 
+    sections.forEach(function (section) {
       var header = section.querySelector('.acc-header');
+      var key = section.dataset.acc;
       if (!header) return;
 
-      // Apply saved open state on boot
-      if (savedAccordionState[sectionId] === true) {
-        section.classList.add('open');
-      } else {
-        section.classList.remove('open');
-      }
+      if (key && key in saved) section.classList.toggle('open', !!saved[key]);
 
-      // 2. SAVE STATE ON CLICK
       header.addEventListener('click', function () {
-        var currentState = window.getState().accordionState || {};
-        var isNowOpen = !section.classList.contains('open');
-        
-        // Create an updated copy of the state object
-        var updatedState = Object.assign({}, currentState);
-        updatedState[sectionId] = isNowOpen;
-
-        // Set the global application state (which triggers the storage.js save)
-        window.setState({ accordionState: updatedState });
+        section.classList.toggle('open');
+        if (!key) return;
+        var cur = window.storage.get('accOpen', {}) || {};
+        cur[key] = section.classList.contains('open');
+        window.storage.set('accOpen', cur);
       });
     });
-
-    // 3. RE-RENDER WHEN STATE CHANGES
-    window.subscribe(function (state, prev) {
-      if (JSON.stringify(state.accordionState) !== JSON.stringify(prev.accordionState)) {
-        var currentAccordionState = state.accordionState || {};
-        sections.forEach(function (section, index) {
-          var sectionId = section.id || 'acc-sec-' + index;
-          section.classList.toggle('open', !!currentAccordionState[sectionId]);
-        });
-      }
-    });
-  }
-
-
-  // ─── Mobile viewport height lock ─────────────────────────────────────────
-  function initMobileViewport() {
-    function lock() {
-      if (window.innerWidth <= 700) {
-        document.documentElement.style.setProperty('--app-height', window.innerHeight + 'px');
-      } else {
-        document.documentElement.style.removeProperty('--app-height');
-      }
-    }
-    lock();
-    window.addEventListener('load', lock);
-
-    var lastW = window.innerWidth;
-    window.addEventListener('resize', function () {
-      if (window.innerWidth !== lastW) {
-        lastW = window.innerWidth;
-        lock();
-      }
-    });
-
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', lock);
-      window.visualViewport.addEventListener('scroll', lock);
-    }
   }
 
   // Expose
