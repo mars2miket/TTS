@@ -48,6 +48,7 @@ window.__LOCALES__.vi = {
   resetTimer: "Đặt lại",
   chars: "Ký tự",
   est: "Ước tính",
+  stopTime:"Dừng bộ đếm",
 
   // Grid columns
   hideColA: "Ẩn cột A",

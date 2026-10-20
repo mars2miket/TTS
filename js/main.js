@@ -52,6 +52,7 @@
     var examMode     = storage.get('examMode', 'choice');
     var examReverse  = storage.get('examReverse', false);
     var viewMode     = storage.get('viewMode', 'lists');
+    var accordionState = storage.get('accordionState', {});
 
     // Ensure at least one empty row exists
     var safeRows = Array.isArray(rows) && rows.length > 0
@@ -83,7 +84,8 @@
       selectedVoiceName: voiceName,
       examMode: examMode,
       examReverse: examReverse,
-      viewMode: viewMode
+      viewMode: viewMode,
+      accordionState: accordionState
     });
 
     // Apply theme + lang to the DOM immediately (avoid flash)
@@ -109,7 +111,8 @@
     selectedVoiceName: 'voiceName',
     examMode:          'examMode',
     examReverse:       'examReverse',
-    viewMode:          'viewMode'
+    viewMode:          'viewMode',
+    accordionState:    'accordionState'
   };
 
   subscribe(function (state, prev) {

@@ -140,7 +140,22 @@
       if (state.genderFilter !== prev.genderFilter) {
         populateVoices();
       }
+      
+      // Disable speech playback if the user switches to the Analytics dashboard
+      if (state.viewMode !== prev.viewMode) {
+        var isAnalytics = (state.viewMode === 'analytics');
+        
+        // 1. Force halt speech if audio is playing when they click over
+        if (isAnalytics && state.isSpeaking) {
+          handleStop();
+        }
+
+        // 2. Lock/Unlock the elements
+        if (readBtn) readBtn.disabled = isAnalytics;
+        if (mobileReadBtn) mobileReadBtn.disabled = isAnalytics;
+      }
     });
+
 
     // Init from current state
     var st = window.getState();

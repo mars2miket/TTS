@@ -79,12 +79,13 @@
 
               <div class="acc-body">
                 <div class="acc-body-inner">
-                  <select id="gender-filter" class="ctrl-select">
+                  <!--select id="gender-filter" class="ctrl-select">
                     <option value="all" data-i18n="allGenders">All Genders</option>
                     <option value="female" data-i18n="femaleOnly">Female Only</option>
                     <option value="male" data-i18n="maleOnly">Male Only</option>
-                  </select>
-                  <input type="text" id="voice-search" class="ctrl-input" placeholder="Search voices...">
+                  </select-->
+                  <input type="text" id="voice-search" class="ctrl-input" placeholder="Search voices..."
+                    data-i18n="searchVoices">
                   <select id="voice-select" class="ctrl-select">
                     <option>Loading voices...</option>
                   </select>
@@ -101,13 +102,7 @@
                 </div>
                 <div class="acc-body">
                   <div class="acc-body-inner">
-                    <div class="slider-container">
-                      <p class="ctrl-label">
-                        <span data-i18n="speed">Speed</span>:
-                        <strong id="speed-value" class="speed-value">0.75x</strong>
-                      </p>
-                      <input type="range" id="speed-slider" min="0.25" max="2" step="0.25" value="0.75" class="slider">
-                    </div>
+
                     <div class="playback-row">
                       <button id="rewind-btn" class="pb-btn" title="Rewind" aria-label="Rewind">
                         <svg viewBox="0 0 24 24">
@@ -146,8 +141,15 @@
                         </svg>
                       </button>
                     </div>
+                    <div class="slider-container">
+                      <p class="ctrl-label">
+                        <span data-i18n="speed">Speed</span>:
+                        <strong id="speed-value" class="speed-value">0.75x</strong>
+                      </p>
+                      <input type="range" id="speed-slider" min="0.25" max="2" step="0.25" value="0.75" class="slider">
+                    </div>
                     <!--here-->
-                    <div class="nested-timer-box"><label class="timer-label">Stop Timer</label>
+                    <div class="nested-timer-box"><label class="timer-label" data-i18n="stopTime">Stop Timer</label>
                       <div class="ctrl-row">
                         <div id="timer-display" class="timer-display">00:00.0</div>
                         <button id="timer-reset-btn" class="ctrl-btn half" data-i18n="resetTimer">Reset</button>

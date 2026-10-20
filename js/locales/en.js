@@ -48,6 +48,7 @@ window.__LOCALES__.en = {
   resetTimer: "Reset",
   chars: "Chars",
   est: "Est",
+  stopTime:"Stop Timer",
 
   // Grid columns
   hideColA: "Hide Col A",

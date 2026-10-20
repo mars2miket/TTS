@@ -91,6 +91,11 @@
 .sidebar-scrollable-content {
   display: flex;
   flex-direction: column;
+
+  /* CHANGE: Use flex-grow instead of height: 100% to keep Firefox contained */
+  flex: 1 1 0%; 
+  min-height: 0; 
+
   height: 100%;
   padding: 12px;
   gap: 4px;
@@ -109,7 +114,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 10px 30px;
+  padding: 20px 120px;
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -119,7 +124,7 @@
    ========================================================================== */
 .sidebar-footer {
   margin-top: auto;
-  padding-top: 10px;
+  padding-top: 4px;
   display: flex;
   flex-direction: column;
   gap: 10px;

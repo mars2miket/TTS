@@ -32,6 +32,8 @@
   }
 }
 
+
+
 /* ==========================================================================
    MOBILE (≤700px) — OPTION B: grid is the scroller, header + footer pinned
    ========================================================================== */
@@ -140,6 +142,7 @@
     bottom: 0;
     background: var(--bg-app);
     z-index: 5;
+    border: none;
   }
 
   #note-area { width: 100%; min-width: 0; }

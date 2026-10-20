@@ -102,20 +102,54 @@
     });
   }
 
-  // ─── Accordion (single-open) ─────────────────────────────────────────────
+  // ─── Accordion (single-open with persistence) ─────────────────────────────
   function initAccordion() {
     var sections = document.querySelectorAll('.acc-section');
     if (!sections.length) return;
 
-    sections.forEach(function (section) {
+    // 1. RESTORE STATE FROM REFRESH
+    // Pull the saved accordion dictionary or default to an empty object
+    var savedAccordionState = window.getState().accordionState || {};
+
+    sections.forEach(function (section, index) {
+      // Ensure each section has an identifier (use ID if present, otherwise fall back to index)
+      var sectionId = section.id || 'acc-sec-' + index; 
       var header = section.querySelector('.acc-header');
       if (!header) return;
 
+      // Apply saved open state on boot
+      if (savedAccordionState[sectionId] === true) {
+        section.classList.add('open');
+      } else {
+        section.classList.remove('open');
+      }
+
+      // 2. SAVE STATE ON CLICK
       header.addEventListener('click', function () {
-        section.classList.toggle('open');
+        var currentState = window.getState().accordionState || {};
+        var isNowOpen = !section.classList.contains('open');
+        
+        // Create an updated copy of the state object
+        var updatedState = Object.assign({}, currentState);
+        updatedState[sectionId] = isNowOpen;
+
+        // Set the global application state (which triggers the storage.js save)
+        window.setState({ accordionState: updatedState });
       });
     });
+
+    // 3. RE-RENDER WHEN STATE CHANGES
+    window.subscribe(function (state, prev) {
+      if (JSON.stringify(state.accordionState) !== JSON.stringify(prev.accordionState)) {
+        var currentAccordionState = state.accordionState || {};
+        sections.forEach(function (section, index) {
+          var sectionId = section.id || 'acc-sec-' + index;
+          section.classList.toggle('open', !!currentAccordionState[sectionId]);
+        });
+      }
+    });
   }
+
 
   // ─── Mobile viewport height lock ─────────────────────────────────────────
   function initMobileViewport() {
