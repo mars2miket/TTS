@@ -56,7 +56,7 @@ window.__LOCALES__.vi = {
   showColA: "Hiện cột A",
   showColB: "Hiện cột B",
   
-  // List buttons
+  // Buttons
   newList: "Danh sách mới",
   renameList: "Đổi tên danh sách",
   deleteList: "Xóa danh sách",
@@ -69,6 +69,9 @@ window.__LOCALES__.vi = {
   expList: "Xuất",
   impList: "Nhập",
   rename: "Đổi tên",
+  theme: "Giao diện",
+  changeLanguage: "Thay đổi ngôn ngữ",
+  moreOptions: "Các tùy chọn khác",
 
   // Modal
   confirmTitle: "Xác nhận",

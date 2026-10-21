@@ -56,7 +56,7 @@ window.__LOCALES__.en = {
   showColA: "Show Col A",
   showColB: "Show Col B",
 
-  // List buttons
+  // Buttons
   newList: "New list",
   renameList: "Rename list",
   deleteList: "Delete list",
@@ -64,11 +64,14 @@ window.__LOCALES__.en = {
   importList: "Import list",
   addRow: "+ Add Row",
   clearContent: "Clear Content",
-  addList: "New",
+  addList: "New file",
   editList: "Edit",
-  expList: "Exp",
-  impList: "Imp",
-  rename: "Rename",
+  expList: "Export file",
+  impList: "Import file",
+  rename: "Rename file",
+  theme: "Theme",
+  changeLanguage: "Change Language",
+  moreOptions: "More Options",
 
   // Modal
   confirmTitle: "Confirm",
