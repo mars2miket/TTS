@@ -1,6 +1,5 @@
 button:hover {
   border: 1px solid #4f46e5;
-  color: #4f46e5;
 }
 
 .seg-btn:hover, #start-test-btn:hover {
@@ -41,7 +40,10 @@ button:hover {
   outline-offset: 2px;
 }
 
-#dashboard-toggle.active {
+#dashboard-toggle:hover, 
+#sidebar-toggle:hover,
+#lang-toggle:hover
+{
   border-color: #6366F1;
   color: #6366F1;
 }
